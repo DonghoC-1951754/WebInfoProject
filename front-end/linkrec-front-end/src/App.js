@@ -39,7 +39,10 @@ function App() {
             path="/profile-creation"
             element={
               <>
-                <Header /> <ProfileCreationForm />
+              <div class="flex flex-col h-screen">
+                <Header />
+                <ProfileCreationForm />
+              </div>
               </>
             }
           />

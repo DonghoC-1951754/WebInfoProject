@@ -2,7 +2,9 @@ import os
 
 from ariadne import gql, load_schema_from_path, QueryType, graphql_sync, make_executable_schema
 from ariadne.explorer import ExplorerGraphiQL
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify 
+from flask_cors import CORS
+
 
 
 
@@ -27,6 +29,8 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+    CORS(app)
+    
     gql_schema = load_schema_from_path('./GraphQL/schema.graphql')
     query = QueryType()
 
