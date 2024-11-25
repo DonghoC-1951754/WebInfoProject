@@ -1,10 +1,9 @@
 type Profile {
     id: ID!
+    firstName: String!
     name: String!
     email: String!
     location: String
-    education: [Education]
-    experience: [Experience]
 }
 
 type Education {
