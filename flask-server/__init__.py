@@ -6,8 +6,6 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 
-
-
 def create_app(test_config=None):
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
@@ -34,7 +32,7 @@ def create_app(test_config=None):
     gql_schema = load_schema_from_path('./GraphQL/schema.graphql')
     query = QueryType()
 
-    schema = make_executable_schema(gql_schema, query)
+   
 
     profiles_test_data = [
         {"id": "1", "firstName": "John", "name": "Doe", "email": "john.doe@example.com", "location": "Belgium"},
@@ -58,13 +56,13 @@ def create_app(test_config=None):
         return next((profile for profile in profiles_test_data if profile["id"] == id), None)
 
 
-    @query.field("hello")
-    def resolve_hello(_, info):
-        request = info.context
-        user_agent = request.headers.get("User-Agent", "Guest")
-        return "Hello, %s!" % user_agent
+    # @query.field("hello")
+    # def resolve_hello(_, info):
+    #     request = info.context
+    #     user_agent = request.headers.get("User-Agent", "Guest")
+    #     return "Hello, %s!" % user_agent
 
-
+    schema = make_executable_schema(gql_schema, query)
     @app.route("/graphql", methods=["GET"])
     def graphql_explorer():
         # On GET request serve the GraphQL explorer.

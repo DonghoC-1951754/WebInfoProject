@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 
 // Fetch all profiles
 export const GET_PROFILES = gql`
-  query GetProfiles {
+  query {
     profiles {
       id
       firstName

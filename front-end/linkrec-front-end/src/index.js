@@ -7,7 +7,9 @@ import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 const client = new ApolloClient({
   uri: " http://127.0.0.1:5000/graphql", // Replace with your GraphQL API endpoint
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    addTypename: false, // Disable __typename
+  }),
 });
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
