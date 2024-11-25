@@ -17,8 +17,8 @@ function Header() {
           <a href="#about" className="hover:text-gray-400">
             About
           </a>
-          <a href="#services" className="hover:text-gray-400">
-            Services
+          <a href="/profiles" className="hover:text-gray-400">
+            Profiles
           </a>
           <a href="#contact" className="hover:text-gray-400">
             Contact

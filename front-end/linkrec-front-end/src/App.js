@@ -15,39 +15,48 @@ function App() {
   return (
     <>
       <Router>
-        <Routes>
-          <Route
-            exact
-            path="/"
-            element={
-              <>
-                <Header /> <LoginForm />
-              </>
-            }
-          />
-          <Route
-            exact
-            path="/registration"
-            element={
-              <>
-                <Header /> <RegisterForm />
-              </>
-            }
-          />
-          <Route
-            exact
-            path="/profile-creation"
-            element={
-              <>
-              <div class="flex flex-col h-screen">
-                <Header />
-                <ProfileCreationForm />
-              </div>
-              </>
-            }
-          />
-          <Route path="*" element={<Navigate to="/" />} />
-        </Routes>
+        <div class="flex flex-col h-screen">
+          <Header />
+          <Routes>
+            <Route
+              exact
+              path="/"
+              element={
+                <>
+                  <LoginForm />
+                </>
+              }
+            />
+            <Route
+              exact
+              path="/registration"
+              element={
+                <>
+                  <RegisterForm />
+                </>
+              }
+            />
+            <Route
+              exact
+              path="/profile-creation"
+              element={
+                <>
+                  <ProfileCreationForm />
+                </>
+              }
+            />
+            <Route
+              exact
+              path="/profiles"
+              element={
+                <>
+                  <ProfileCreationForm />
+                </>
+              }
+            />
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
+        </div>
       </Router>
     </>
   );
