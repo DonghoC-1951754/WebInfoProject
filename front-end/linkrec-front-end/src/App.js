@@ -9,19 +9,19 @@ import {
   Navigate,
 } from "react-router-dom";
 import RegisterForm from "./components/RegisterForm";
+import ProfileCreationForm from "./components/ProfileCreationForm";
 
 function App() {
   return (
     <>
       <Router>
-        <Header />
         <Routes>
           <Route
             exact
             path="/"
             element={
               <>
-                <LoginForm />
+                <Header /> <LoginForm />
               </>
             }
           />
@@ -30,7 +30,16 @@ function App() {
             path="/registration"
             element={
               <>
-                <RegisterForm />
+                <Header /> <RegisterForm />
+              </>
+            }
+          />
+          <Route
+            exact
+            path="/profile-creation"
+            element={
+              <>
+                <Header /> <ProfileCreationForm />
               </>
             }
           />

@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 
 function LoginForm() {
   return (
-    <div class="font-[sans-serif] bg-gray-50 dark:bg-gray-900 text-white">
+    <div class="font-[sans-serif] bg-gray-50 dark:bg-gray-900 text-white py-0">
       <div class="min-h-screen flex fle-col items-center justify-center py-6 px-4">
         <div class="grid md:grid-cols-2 items-center gap-10 max-w-6xl w-full">
           <div>
