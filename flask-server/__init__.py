@@ -44,20 +44,21 @@ def create_app(test_config=None):
     # Resolver for `profiles` query
     @query.field("profiles")
     def resolve_profiles(_, info):
-        return profiles_data
+        return profiles_test_data
+
 
     # Resolver for `profile` query
     @query.field("profile")
     def resolve_profile(_, info, id):
         # Find profile by ID
-        return next((profile for profile in profiles_data if profile["id"] == id), None)
+        return next((profile for profile in profiles_test_data if profile["id"] == id), None)
+
 
     @query.field("hello")
     def resolve_hello(_, info):
         request = info.context
         user_agent = request.headers.get("User-Agent", "Guest")
         return "Hello, %s!" % user_agent
-
 
 
     @app.route("/graphql", methods=["GET"])
