@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import RegisterForm from "./components/RegisterForm";
 import ProfileCreationForm from "./components/ProfileCreationForm";
+import Profiles from "./components/Profiles";
 
 function App() {
   return (
@@ -50,7 +51,7 @@ function App() {
               path="/profiles"
               element={
                 <>
-                  <ProfileCreationForm />
+                  <Profiles />
                 </>
               }
             />
