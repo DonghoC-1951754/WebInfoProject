@@ -1,0 +1,67 @@
+type Profile {
+    id: ID!
+    name: String!
+    email: String!
+    location: String
+    education: [Education]
+    experience: [Experience]
+}
+
+type Education {
+    institution: String!
+    degree: String!
+    fieldOfStudy: String!
+    yearGraduated: Int
+}
+
+type Experience {
+    companyName: String!
+    jobTitle: String!
+    startDate: String
+    endDate: String
+    description: String
+}
+
+type Vacancy {
+    id: ID!
+    jobTitle: String!
+    companyName: String!
+    location: String
+    requiredSkills: [String]
+    postedBy: Company
+    startDate: String
+    endDate: String
+    active: Boolean
+}
+
+type Company {
+    id: ID!
+    name: String!
+    location: String
+    vacancies: [Vacancy]
+}
+
+
+
+
+
+
+
+
+type Query {
+    profiles: [Profile]
+    profile(id: ID!): Profile
+    vacancies: [Vacancy]
+    vacancy(id: ID!): Vacancy
+    searchProfilesByIndustry(industry: String!): [Profile]
+    activeVacancies: [Vacancy]
+}
+
+# Mutation Type: Modify data in the system
+type Mutation {
+    createProfile(name: String!, email: String!, location: String!): Profile
+    updateProfile(id: ID!, name: String, email: String, location: String): Profile
+    createVacancy(jobTitle: String!, companyName: String!, location: String!, requiredSkills: [String]): Vacancy
+    updateVacancy(id: ID!, jobTitle: String, location: String, requiredSkills: [String]): Vacancy
+    deleteVacancy(id: ID!): String
+}
