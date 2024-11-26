@@ -50,6 +50,7 @@ type Company {
 type Query {
     profiles: [Profile]
     profile(id: ID!): Profile
+      profileByEmail(email: String!): Profile
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
     searchProfilesByIndustry(industry: String!): [Profile]
@@ -58,7 +59,7 @@ type Query {
 
 # Mutation Type: Modify data in the system
 type Mutation {
-    createProfile(name: String!, email: String!, location: String!): Profile
+    createProfile(firstName: String!, name: String!, email: String!, location: String!): Profile
     updateProfile(id: ID!, name: String, email: String, location: String): Profile
     createVacancy(jobTitle: String!, companyName: String!, location: String!, requiredSkills: [String]): Vacancy
     updateVacancy(id: ID!, jobTitle: String, location: String, requiredSkills: [String]): Vacancy

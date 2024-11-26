@@ -12,3 +12,11 @@ export const GET_PROFILES = gql`
     }
   }
 `;
+
+export const CHECK_EMAIL_EXISTS = gql`
+  query CheckEmailExists($email: String!) {
+    profileByEmail(email: $email) {
+      id
+    }
+  }
+`;
