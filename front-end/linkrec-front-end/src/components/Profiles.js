@@ -11,7 +11,7 @@ const Profiles = () => {
 
     return (
         <div className="min-w-screen bg-gray-100 dark:bg-gray-900 flex-grow">
-            <div className="flex flex-wrap gap-4 justify-center mt-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 p-4">
                 {data.profiles.map(profile => (
                     <ProfileCard 
                         key={profile.id}
@@ -25,5 +25,6 @@ const Profiles = () => {
         </div>
     );
 };
+
 
 export default Profiles;
