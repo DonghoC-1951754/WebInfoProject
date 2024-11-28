@@ -2,9 +2,9 @@ import { Link } from "react-router-dom";
 import React, { useState } from "react";
 import { useMutation, useLazyQuery } from "@apollo/client";
 import { CHECK_EMAIL_EXISTS } from "../GraphQL/queries";
-import { CREATE_PROFILE } from "../GraphQL/mutations";
+import { CREATE_USER } from "../GraphQL/mutations";
 
-function ProfileCreationForm() {
+function UserCreationForm() {
   const [formData, setFormData] = useState({
     firstName: "",
     name: "",
@@ -22,7 +22,7 @@ function ProfileCreationForm() {
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const [createProfile, { loading, error, data }] = useMutation(CREATE_PROFILE);
+  const [createUser, { loading, error, data }] = useMutation(CREATE_USER);
   const [checkEmailExists, { loading: emailCheckLoading }] = useLazyQuery(CHECK_EMAIL_EXISTS, {
     fetchPolicy: "network-only",
   });
@@ -94,13 +94,13 @@ function ProfileCreationForm() {
     try {
       const { data: emailData } = await checkEmailExists({ variables: { email } });
 
-      if (emailData?.profileByEmail) {
+      if (emailData?.userByEmail) {
         alert("Email is already in use. Please use a different email.");
         return;
       }
 
       // Create the profile
-      await createProfile({
+      await createUser({
         variables: {
           firstName,
           name,
@@ -325,4 +325,4 @@ function ProfileCreationForm() {
   );
 }
 
-export default ProfileCreationForm;
+export default UserCreationForm;

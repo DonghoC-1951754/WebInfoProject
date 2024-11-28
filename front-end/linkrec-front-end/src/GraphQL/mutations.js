@@ -1,7 +1,7 @@
 import { gql } from '@apollo/client';
 
-export const CREATE_PROFILE = gql`
-  mutation CreateProfile(
+export const CREATE_USER = gql`
+  mutation CreateUser(
     $firstName: String!,
     $name: String!,
     $email: String!,
@@ -10,7 +10,7 @@ export const CREATE_PROFILE = gql`
     $location: LocationInput!,
     $gender: String!
   ) {
-    createProfile(
+    createUser(
       firstName: $firstName,
       name: $name,
       email: $email,
@@ -36,8 +36,8 @@ export const CREATE_PROFILE = gql`
   }
 `;
 
-export const UPDATE_PROFILE = gql`
-  mutation UpdateProfile(
+export const UPDATE_USER = gql`
+  mutation UpdateUser(
     $id: ID!,
     $firstName: String,
     $name: String,
@@ -49,7 +49,7 @@ export const UPDATE_PROFILE = gql`
     $educations: [EducationInput!],
     $experiences: [ExperienceInput!]
   ) {
-    updateProfile(
+    updateUser(
       id: $id,
       firstName: $firstName,
       name: $name,

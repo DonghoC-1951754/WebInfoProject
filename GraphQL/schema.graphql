@@ -1,6 +1,6 @@
 scalar Date
 
-type Profile {
+type User {
     id: ID!
     firstName: String!
     name: String!
@@ -11,6 +11,13 @@ type Profile {
     gender: String!
     educations: [Education!]
     experiences: [Experience!]
+}
+
+type Company {
+    id: ID!
+    name: String!
+    location: String
+    vacancies: [Vacancy]
 }
 
 type Location{
@@ -48,12 +55,7 @@ type Vacancy {
     active: Boolean
 }
 
-type Company {
-    id: ID!
-    name: String!
-    location: String
-    vacancies: [Vacancy]
-}
+
 
 # Inputs
 input LocationInput {
@@ -82,18 +84,18 @@ input ExperienceInput {
 
 #Queries
 type Query {
-    profiles: [Profile]
-    profile(id: ID!): Profile
-    profileByEmail(email: String!): Profile
+    users: [User]
+    user(id: ID!): User
+    userByEmail(email: String!): User
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
-    searchProfilesByIndustry(industry: String!): [Profile]
+    searchUsersByIndustry(industry: String!): [User]
     activeVacancies: [Vacancy]
 }
 
 # Mutation Type: Modify data in the system
 type Mutation {
-    createProfile(
+    createUser(
         firstName: String!,
         name: String!,
         email: String!,
@@ -101,9 +103,9 @@ type Mutation {
         dateOfBirth: Date!,
         location: LocationInput!,
         gender: String!
-    ): Profile
-        # New Mutation for Updating a Profile
-    updateProfile(
+    ): User
+        # New Mutation for Updating a User
+    updateUser(
         id: ID!,
         firstName: String,
         name: String,
@@ -114,7 +116,7 @@ type Mutation {
         gender: String,
         educations: [EducationInput!],
         experiences: [ExperienceInput!]
-    ): Profile
+    ): User
 
     createVacancy(jobTitle: String!, companyName: String!, location: String!, requiredSkills: [String]): Vacancy
     updateVacancy(id: ID!, jobTitle: String, location: String, requiredSkills: [String]): Vacancy

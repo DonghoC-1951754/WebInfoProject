@@ -1,21 +1,27 @@
 import { gql } from '@apollo/client';
 
-// Fetch all profiles
-export const GET_PROFILES = gql`
+// Fetch all Users
+export const GET_USERS = gql`
   query {
-    profiles {
+    users {
       id
       firstName
       name
       email
-      location
+      location{
+        country
+        city
+        cityCode
+        street
+        houseNumber
+      }
     }
   }
 `;
 
 export const CHECK_EMAIL_EXISTS = gql`
   query CheckEmailExists($email: String!) {
-    profileByEmail(email: $email) {
+    userByEmail(email: $email) {
       id
     }
   }

@@ -52,7 +52,7 @@ def create_app(test_config=None):
     query = QueryType()
     mutation = MutationType()
 
-    profiles_test_data = [
+    users_test_data = [
         {"id": "1", "firstName": "John", "name": "Doe", "email": "john.doe@example.com", "location": {"country": "Belgium", "city": "Brussels", "cityCode": 1000}, "gender": "Male", "dateOfBirth": "1985-02-12", "password": "hashedPassword1"},
         {"id": "2", "firstName": "Mary", "name": "Jane", "email": "mary.jane@example.com", "location": {"country": "USA", "city": "New York", "cityCode": 10001}, "gender": "Female", "dateOfBirth": "1990-03-15", "password": "hashedPassword2"},
         {"id": "3", "firstName": "Peter", "name": "Pan", "email": "peter.pan@example.com", "location": {"country": "Neverland", "city": "Neverland", "cityCode": 12345}, "gender": "Male", "dateOfBirth": "1995-07-23", "password": "hashedPassword3"},
@@ -61,39 +61,40 @@ def create_app(test_config=None):
         {"id": "6", "firstName": "Jos", "name": "Brinkie", "email": "jos.brinkie@example.com", "location": {"country": "USA", "city": "Chicago", "cityCode": 60601}, "gender": "Male", "dateOfBirth": "1988-11-28", "password": "hashedPassword6"},
     ]
 
-    # Resolver for `profiles` query
-    @query.field("profiles")
-    def resolve_profiles(_, info):
-        return profiles_test_data
+    # Resolver for `users` query
+    @query.field("users")
+    def resolve_users(_, info):
+        print("hier")
+        return users_test_data
 
-    # Resolver for `profile` query
-    @query.field("profile")
-    def resolve_profile(_, info, id):
-        return next((profile for profile in profiles_test_data if profile["id"] == id), None)
+    # Resolver for `user` query
+    @query.field("user")
+    def resolve_user(_, info, id):
+        return next((user for user in users_test_data if user["id"] == id), None)
     
-    # Resolver for `profileByEmail` query
-    @query.field("profileByEmail")
-    def resolve_profile_by_email(_, info, email):
-        return next((profile for profile in profiles_test_data if profile["email"] == email), None)
+    # Resolver for `userByEmail` query
+    @query.field("userByEmail")
+    def resolve_user_by_email(_, info, email):
+        return next((user for user in users_test_data if user["email"] == email), None)
 
     # Helper function to hash passwords
     def hash_password(password: str) -> str:
         salt = bcrypt.gensalt()
         return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
-    # Resolver for `createProfile` mutation
-    @mutation.field("createProfile")
-    def resolve_create_profile(_, info, firstName, name, email, password, dateOfBirth, location, gender):
+    # Resolver for `createuser` mutation
+    @mutation.field("createUser")
+    def resolve_create_user(_, info, firstName, name, email, password, dateOfBirth, location, gender):
         # Check if the email already exists
-        if any(profile["email"] == email for profile in profiles_test_data):
-            raise Exception(f"Profile with email '{email}' already exists.")
+        if any(user["email"] == email for user in users_test_data):
+            raise Exception(f"user with email '{email}' already exists.")
         
         # Hash the password before saving it
         hashed_password = hash_password(password)
         
-        # Create the new profile
-        new_id = str(len(profiles_test_data) + 1)
-        new_profile = {
+        # Create the new user
+        new_id = str(len(users_test_data) + 1)
+        new_user = {
             "id": new_id,
             "firstName": firstName,
             "name": name,
@@ -105,37 +106,37 @@ def create_app(test_config=None):
             "educations": [],
             "experiences": []
         }
-        profiles_test_data.append(new_profile)
-        return new_profile
+        users_test_data.append(new_user)
+        return new_user
 
-    # Resolver for `updateProfile` mutation
-    @mutation.field("updateProfile")
-    def resolve_update_profile(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, password=None, educations=None, experiences=None):
-        profile = next((p for p in profiles_test_data if p["id"] == id), None)
-        if not profile:
-            return None  # Return None if no profile matches the ID
+    # Resolver for `updateUser` mutation
+    @mutation.field("updateUser")
+    def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, password=None, educations=None, experiences=None):
+        user = next((p for p in users_test_data if p["id"] == id), None)
+        if not user:
+            return None  # Return None if no user matches the ID
 
         # Update fields if provided
         if firstName:
-            profile["firstName"] = firstName
+            user["firstName"] = firstName
         if name:
-            profile["name"] = name
+            user["name"] = name
         if email:
-            profile["email"] = email
+            user["email"] = email
         if location:
-            profile["location"] = location
+            user["location"] = location
         if gender:
-            profile["gender"] = gender
+            user["gender"] = gender
         if dateOfBirth:
-            profile["dateOfBirth"] = dateOfBirth
+            user["dateOfBirth"] = dateOfBirth
         if password:
             # Hash the password before updating it
-            profile["password"] = hash_password(password)
+            user["password"] = hash_password(password)
         if educations is not None:
-            profile["educations"] = educations
+            user["educations"] = educations
         if experiences is not None:
-            profile["experiences"] = experiences
-        return profile
+            user["experiences"] = experiences
+        return user
 
     # Create executable schema including the Date scalar
     schema = make_executable_schema(gql_schema, query, mutation, date_scalar)
@@ -143,8 +144,8 @@ def create_app(test_config=None):
     # GraphQL explorer route
     @app.route("/graphql", methods=["GET"])
     def graphql_explorer():
-        for profile in profiles_test_data:
-            print(profile)
+        for user in users_test_data:
+            print(user)
             print("\n")
         return ExplorerGraphiQL().render()
 
@@ -161,8 +162,8 @@ def create_app(test_config=None):
             debug=app.debug
         )
         status_code = 200 if success else 400
-        for profile in profiles_test_data:
-            print(profile)
+        for user in users_test_data:
+            print(user)
             print("\n")
         return jsonify(result), status_code
 

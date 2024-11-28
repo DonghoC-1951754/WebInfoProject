@@ -11,8 +11,8 @@ import {
 import Header from "./components/Header";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
-import ProfileCreationForm from "./components/ProfileCreationForm";
-import Profiles from "./components/Profiles";
+import UserCreationForm from "./components/UserCreationForm";
+import Users from "./components/Users";
 import Vacancies from "./components/Vacancies";
 import EmptyPage from "./components/EmptyPage";
 
@@ -66,7 +66,7 @@ function App() {
               path="/registration"
               element={
                 <>
-                  <ProfileCreationForm />
+                  <UserCreationForm />
                 </>
               }
             />
@@ -75,7 +75,7 @@ function App() {
               path="/profiles"
               element={
                 <>
-                  <Profiles />
+                  <Users />
                 </>
               }
             />
