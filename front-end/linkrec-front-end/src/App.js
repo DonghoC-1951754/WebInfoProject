@@ -52,7 +52,7 @@ function App() {
                 </>
               }
             />
-            <Route
+            {/* <Route
               exact
               path="/registration"
               element={
@@ -60,10 +60,10 @@ function App() {
                   <RegisterForm />
                 </>
               }
-            />
+            /> */}
             <Route
               exact
-              path="/profile-creation"
+              path="/registration"
               element={
                 <>
                   <ProfileCreationForm />
