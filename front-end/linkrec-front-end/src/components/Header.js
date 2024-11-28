@@ -20,8 +20,8 @@ function Header() {
           <a href="/profiles" className="hover:text-gray-400">
             Profiles
           </a>
-          <a href="#contact" className="hover:text-gray-400">
-            Contact
+          <a href="/vacancies" className="hover:text-gray-400">
+            Vacancies
           </a>
         </nav>
       </div>
