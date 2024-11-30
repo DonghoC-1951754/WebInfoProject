@@ -16,7 +16,7 @@ type User {
 type Company {
     id: ID!
     name: String!
-    location: String
+    location: Location!
     vacancies: [Vacancy]
 }
 
@@ -46,13 +46,10 @@ type Experience {
 type Vacancy {
     id: ID!
     jobTitle: String!
-    companyName: String!
-    location: String
+    company: Company!
     requiredSkills: [String]
-    postedBy: Company
-    startDate: String
-    endDate: String
-    active: Boolean
+    startDate: Date!
+    endDate: Date!
 }
 
 
@@ -89,8 +86,8 @@ type Query {
     userByEmail(email: String!): User
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
+    activeVacancies(currentDate: Date!): [Vacancy]
     searchUsersByIndustry(industry: String!): [User]
-    activeVacancies: [Vacancy]
 }
 
 # Mutation Type: Modify data in the system
