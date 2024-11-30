@@ -28,13 +28,13 @@ export const CHECK_EMAIL_EXISTS = gql`
 `;
 
 export const GET_ACTIVE_VACANCIES = gql`
-  query GetActiveVancancies($currentDate: String!) {
-    activeVancancies(currentDate: $currentDate) {
+  query GetActiveVacancies($currentDate: Date!) {
+    activeVacancies(currentDate: $currentDate) {
       id
       jobTitle
-      company{
+      company {
         name
-        location{
+        location {
           country
           city
           cityCode
