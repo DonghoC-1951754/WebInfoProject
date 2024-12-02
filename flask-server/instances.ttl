@@ -1,0 +1,124 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/schema#> .
+
+### Example Locations
+ex:Location1 a ex:Location ;
+    ex:country "USA" ;
+    ex:city "San Francisco" ;
+    ex:cityCode "94107" ;
+    ex:street "Market Street" ;
+    ex:houseNumber "123" .
+
+ex:Location2 a ex:Location ;
+    ex:country "Germany" ;
+    ex:city "Berlin" ;
+    ex:cityCode "10115" ;
+    ex:street "Unter den Linden" ;
+    ex:houseNumber "5" .
+
+### Example Users
+ex:User1 a ex:User ;
+    ex:id "U001" ;
+    ex:firstName "John" ;
+    ex:name "Doe" ;
+    ex:email "john.doe@example.com" ;
+    ex:password "hashed_password_123" ;
+    ex:dateOfBirth "1985-07-15"^^xsd:date ;
+    ex:gender "Male" ;
+    ex:location ex:Location1 ;
+    ex:educations ex:Education1, ex:Education2 ;
+    ex:experiences ex:Experience1 .
+
+ex:User2 a ex:User ;
+    ex:id "U002" ;
+    ex:firstName "Jane" ;
+    ex:name "Smith" ;
+    ex:email "jane.smith@example.com" ;
+    ex:password "hashed_password_456" ;
+    ex:dateOfBirth "1990-02-20"^^xsd:date ;
+    ex:gender "Female" ;
+    ex:location ex:Location2 ;
+    ex:educations ex:Education3 ;
+    ex:experiences ex:Experience2, ex:Experience3 .
+
+### Example Educations
+ex:Education1 a ex:Education ;
+    ex:institution "Harvard University" ;
+    ex:degree "Bachelor's" ;
+    ex:fieldOfStudy "Computer Science" ;
+    ex:yearGraduated 2007 .
+
+ex:Education2 a ex:Education ;
+    ex:institution "MIT" ;
+    ex:degree "Master's" ;
+    ex:fieldOfStudy "Artificial Intelligence" ;
+    ex:yearGraduated 2010 .
+
+ex:Education3 a ex:Education ;
+    ex:institution "Humboldt University" ;
+    ex:degree "PhD" ;
+    ex:fieldOfStudy "Physics" ;
+    ex:yearGraduated 2018 .
+
+### Example Companies
+ex:Company1 a ex:Company ;
+    ex:id "C001" ;
+    ex:name "TechCorp" ;
+    ex:location ex:Location1 ;
+    ex:vacancies ex:Vacancy1, ex:Vacancy2 .
+
+ex:Company2 a ex:Company ;
+    ex:id "C002" ;
+    ex:name "Innovatech" ;
+    ex:location ex:Location2 ;
+    ex:vacancies ex:Vacancy3 .
+
+### Example Experiences
+ex:Experience1 a ex:Experience ;
+    ex:companyName ex:Company1 ;
+    ex:jobTitle "Software Engineer" ;
+    ex:startDate "2010-08-01"^^xsd:date ;
+    ex:endDate "2015-12-31"^^xsd:date ;
+    ex:description "Developed scalable web applications." .
+
+ex:Experience2 a ex:Experience ;
+    ex:companyName ex:Company2 ;
+    ex:jobTitle "Data Scientist" ;
+    ex:startDate "2016-01-01"^^xsd:date ;
+    ex:endDate "2020-06-30"^^xsd:date ;
+    ex:description "Analyzed large datasets to derive insights." .
+
+ex:Experience3 a ex:Experience ;
+    ex:companyName ex:Company1 ;
+    ex:jobTitle "Project Manager" ;
+    ex:startDate "2020-07-01"^^xsd:date ;
+    ex:description "Led cross-functional teams on AI projects." .
+
+### Example Vacancies
+ex:Vacancy1 a ex:Vacancy ;
+    ex:id "V001" ;
+    ex:jobTitle "Full Stack Developer" ;
+    ex:company ex:Company1 ;
+    ex:requiredSkills "JavaScript", "React", "Node.js" ;
+    ex:startDate "2024-01-01"^^xsd:date ;
+    ex:endDate "2024-12-31"^^xsd:date .
+
+ex:Vacancy2 a ex:Vacancy ;
+    ex:id "V002" ;
+    ex:jobTitle "DevOps Engineer" ;
+    ex:company ex:Company1 ;
+    ex:requiredSkills "AWS", "Docker", "Kubernetes" ;
+    ex:startDate "2024-03-01"^^xsd:date ;
+    ex:endDate "2025-02-28"^^xsd:date .
+
+ex:Vacancy3 a ex:Vacancy ;
+    ex:id "V003" ;
+    ex:jobTitle "AI Research Scientist" ;
+    ex:company ex:Company2 ;
+    ex:requiredSkills "Machine Learning", "Python", "TensorFlow" ;
+    ex:startDate "2024-06-01"^^xsd:date ;
+    ex:endDate "2025-05-31"^^xsd:date .

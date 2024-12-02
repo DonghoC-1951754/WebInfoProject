@@ -1,0 +1,201 @@
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix ex: <http://example.com/schema#> .
+
+# Ontology metadata
+<http://example.com/schema#>
+    a owl:Ontology ;
+    rdfs:label "Ontology for LinkedIn-style App" ;
+    rdfs:comment "An ontology defining profiles, companies, and vacancies for a social networking application." .
+
+### Classes
+# User
+ex:User a owl:Class ;
+    rdfs:subClassOf foaf:Person ;
+    rdfs:label "User" ;
+    rdfs:comment "A class representing users in the application." .
+
+# Company
+ex:Company a owl:Class ;
+    rdfs:subClassOf foaf:Organization ;
+    rdfs:label "Company" ;
+    rdfs:comment "A class representing a company." .
+
+# Location
+ex:Location a owl:Class ;
+    rdfs:label "Location" ;
+    rdfs:comment "A class representing a geographical location." .
+
+# Education
+ex:Education a owl:Class ;
+    rdfs:label "Education" ;
+    rdfs:comment "A class representing an education record for a user." .
+
+# Experience
+ex:Experience a owl:Class ;
+    rdfs:label "Experience" ;
+    rdfs:comment "A class representing a professional experience record for a user." .
+
+# Vacancy
+ex:Vacancy a owl:Class ;
+    rdfs:label "Vacancy" ;
+    rdfs:comment "A class representing a job vacancy." .
+
+### Properties
+# User properties
+ex:id a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "id" ;
+    rdfs:comment "Unique identifier for the user." .
+
+ex:firstName a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "firstName" ;
+    rdfs:comment "The first name of the user." .
+
+ex:name a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "name" ;
+    rdfs:comment "The last name of the user." .
+
+ex:email a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "email" ;
+    rdfs:comment "The email address of the user." .
+
+ex:password a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "password" ;
+    rdfs:comment "The hashed password of the user." .
+
+ex:dateOfBirth a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:date ;
+    rdfs:label "dateOfBirth" ;
+    rdfs:comment "The date of birth of the user." .
+
+ex:gender a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "gender" ;
+    rdfs:comment "The gender of the user." .
+
+ex:location a owl:ObjectProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range ex:Location ;
+    rdfs:label "location" ;
+    rdfs:comment "The location of the user." .
+
+ex:educations a owl:ObjectProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range ex:Education ;
+    rdfs:label "educations" ;
+    rdfs:comment "Education records of the user." .
+
+ex:experiences a owl:ObjectProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range ex:Experience ;
+    rdfs:label "experiences" ;
+    rdfs:comment "Professional experiences of the user." .
+
+# Company properties
+ex:vacancies a owl:ObjectProperty ;
+    rdfs:domain ex:Company ;
+    rdfs:range ex:Vacancy ;
+    rdfs:label "vacancies" ;
+    rdfs:comment "Job vacancies offered by the company." .
+
+# Location properties
+ex:country a owl:DatatypeProperty ;
+    rdfs:domain ex:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "country" ;
+    rdfs:comment "The country of the location." .
+
+ex:city a owl:DatatypeProperty ;
+    rdfs:domain ex:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "city" ;
+    rdfs:comment "The city of the location." .
+
+ex:cityCode a owl:DatatypeProperty ;
+    rdfs:domain ex:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "cityCode" ;
+    rdfs:comment "The city code or postal code of the location." .
+
+ex:street a owl:DatatypeProperty ;
+    rdfs:domain ex:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "street" ;
+    rdfs:comment "The street address of the location." .
+
+ex:houseNumber a owl:DatatypeProperty ;
+    rdfs:domain ex:Location ;
+    rdfs:range xsd:string ;
+    rdfs:label "houseNumber" ;
+    rdfs:comment "The house number in the address." .
+
+# Education properties
+ex:institution a owl:DatatypeProperty ;
+    rdfs:domain ex:Education ;
+    rdfs:range xsd:string ;
+    rdfs:label "institution" ;
+    rdfs:comment "The name of the educational institution." .
+
+ex:degree a owl:DatatypeProperty ;
+    rdfs:domain ex:Education ;
+    rdfs:range xsd:string ;
+    rdfs:label "degree" ;
+    rdfs:comment "The degree obtained from the institution." .
+
+ex:fieldOfStudy a owl:DatatypeProperty ;
+    rdfs:domain ex:Education ;
+    rdfs:range xsd:string ;
+    rdfs:label "fieldOfStudy" ;
+    rdfs:comment "The field of study of the degree." .
+
+ex:yearGraduated a owl:DatatypeProperty ;
+    rdfs:domain ex:Education ;
+    rdfs:range xsd:integer ;
+    rdfs:label "yearGraduated" ;
+    rdfs:comment "The year the user graduated." .
+
+# Experience properties
+ex:companyName a owl:ObjectProperty ;
+    rdfs:domain ex:Experience ;
+    rdfs:range ex:Company ;
+    rdfs:label "companyName" ;
+    rdfs:comment "The company associated with the experience." .
+
+ex:jobTitle a owl:DatatypeProperty ;
+    rdfs:domain ex:Experience ;
+    rdfs:range xsd:string ;
+    rdfs:label "jobTitle" ;
+    rdfs:comment "The job title of the experience." .
+
+ex:startDate a owl:DatatypeProperty ;
+    rdfs:domain ex:Experience ;
+    rdfs:range xsd:date ;
+    rdfs:label "startDate" ;
+    rdfs:comment "The start date of the experience." .
+
+ex:endDate a owl:DatatypeProperty ;
+    rdfs:domain ex:Experience ;
+    rdfs:range xsd:date ;
+    rdfs:label "endDate" ;
+    rdfs:comment "The end date of the experience." .
+
+ex:description a owl:DatatypeProperty ;
+    rdfs:domain ex:Experience ;
+    rdfs:range xsd:string ;
+    rdfs:label "description" ;
+    rdfs:comment "Description of the experience." .

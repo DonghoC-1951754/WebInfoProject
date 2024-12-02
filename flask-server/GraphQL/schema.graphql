@@ -1,0 +1,121 @@
+scalar Date
+
+type User {
+    id: ID!
+    firstName: String!
+    name: String!
+    email: String!
+    password: String!
+    dateOfBirth: Date!
+    location: Location!
+    gender: String!
+    educations: [Education!]
+    experiences: [Experience!]
+}
+
+type Company {
+    id: ID!
+    name: String!
+    location: Location!
+    vacancies: [Vacancy]
+}
+
+type Location{
+    country: String!
+    city: String!
+    cityCode: String!
+    street: String
+    houseNumber: String
+}
+
+type Education {
+    institution: String!
+    degree: String!
+    fieldOfStudy: String!
+    yearGraduated: Int
+}
+
+type Experience {
+    companyName: Company!
+    jobTitle: String!
+    startDate: String
+    endDate: String
+    description: String
+}
+
+type Vacancy {
+    id: ID!
+    jobTitle: String!
+    company: Company!
+    requiredSkills: [String]
+    startDate: Date!
+    endDate: Date!
+}
+
+
+
+# Inputs
+input LocationInput {
+    country: String!
+    city: String!
+    cityCode: String!
+    street: String
+    houseNumber: String
+}
+
+input EducationInput {
+    institution: String!
+    degree: String!
+    fieldOfStudy: String!
+    yearGraduated: Int
+}
+
+input ExperienceInput {
+    companyName: String!
+    jobTitle: String!
+    startDate: String
+    endDate: String
+    description: String
+}
+
+
+#Queries
+type Query {
+    users: [User]
+    user(id: ID!): User
+    userByEmail(email: String!): User
+    vacancies: [Vacancy]
+    vacancy(id: ID!): Vacancy
+    activeVacancies(currentDate: Date!): [Vacancy]
+    searchUsersByIndustry(industry: String!): [User]
+}
+
+# Mutation Type: Modify data in the system
+type Mutation {
+    createUser(
+        firstName: String!,
+        name: String!,
+        email: String!,
+        password: String!,
+        dateOfBirth: Date!,
+        location: LocationInput!,
+        gender: String!
+    ): User
+        # New Mutation for Updating a User
+    updateUser(
+        id: ID!,
+        firstName: String,
+        name: String,
+        email: String,
+        password: String,
+        dateOfBirth: Date,
+        location: LocationInput,
+        gender: String,
+        educations: [EducationInput!],
+        experiences: [ExperienceInput!]
+    ): User
+
+    createVacancy(jobTitle: String!, companyName: String!, location: String!, requiredSkills: [String]): Vacancy
+    updateVacancy(id: ID!, jobTitle: String, location: String, requiredSkills: [String]): Vacancy
+    deleteVacancy(id: ID!): String
+}

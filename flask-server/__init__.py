@@ -5,7 +5,22 @@ from ariadne import gql, load_schema_from_path, QueryType, MutationType, graphql
 from ariadne.explorer import ExplorerGraphiQL
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from rdflib import Graph, Namespace, RDF, Literal
 
+
+# load in the RDF graph
+rdf_graph = Graph()
+rdf_graph.parse("./flask-server/linkrec.ttl", format="turtle")
+
+# load in instances of the classes
+instances_graph = Graph()
+instances_graph.parse("./flask-server/instances.ttl", format="turtle")
+
+# combine graphs
+rdf_graph = rdf_graph + instances_graph
+
+# Define namespaces
+EX = Namespace("http://example.org/")
 
 # Define a custom Date scalar
 date_scalar = ScalarType("Date")
@@ -156,12 +171,12 @@ def create_app(test_config=None):
     schema = make_executable_schema(gql_schema, query, mutation, date_scalar)
 
     # GraphQL explorer route
-    @app.route("/graphql", methods=["GET"])
-    def graphql_explorer():
-        for user in users_test_data:
-            print(user)
-            print("\n")
-        return ExplorerGraphiQL().render()
+    # @app.route("/graphql", methods=["GET"])
+    # def graphql_explorer():
+    #     for user in users_test_data:
+    #         print(user)
+    #         print("\n")
+    #     return ExplorerGraphiQL().render()
 
     # GraphQL server route
     @app.route("/graphql", methods=["POST"])
@@ -185,5 +200,62 @@ def create_app(test_config=None):
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
+
+    from flask import jsonify
+
+    @app.route('/sparql')
+    def sparql_query():
+        query = """
+        SELECT ?subject ?predicate ?object
+        WHERE {
+            ?subject ?predicate ?object .
+        }
+        """
+        query = """
+        PREFIX ex: <http://example.com/schema#>
+        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
+
+        SELECT ?user ?firstName ?name ?email ?country ?city ?institution ?degree
+        WHERE {
+        ?user a ex:User ;
+                ex:firstName ?firstName ;
+                ex:name ?name ;
+                ex:email ?email ;
+                ex:location ?location ;
+                ex:educations ?education .
+
+        ?location ex:country ?country ;
+                    ex:city ?city .
+
+        ?education ex:institution ?institution ;
+                    ex:degree ?degree .
+        }
+        """
+        headers = []  # Column headers for the table
+        rows = []  # Data rows for the table
+
+        try:
+            # Execute the SPARQL query
+            query_results = rdf_graph.query(query)
+
+            # Extract variable names for headers
+            headers = [str(var) for var in query_results.vars]
+
+            # Iterate over the query results and store them
+            rows = [
+                {headers[i]: str(row[i]) for i in range(len(headers))}
+                for row in query_results
+            ]
+
+        except Exception as e:
+            return jsonify({"error": str(e)})
+
+        # Return the results as JSON
+        json = jsonify({"headers": headers, "rows": rows})
+        print(json)
+        return json
+
+
+        
 
     return app
