@@ -6,15 +6,16 @@ from ariadne.explorer import ExplorerGraphiQL
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from rdflib import Graph, Namespace, RDF, Literal
+from flask_server.convert_graphql import graphql_to_sparql, convert_response
 
 
 # load in the RDF graph
 rdf_graph = Graph()
-rdf_graph.parse("./flask-server/linkrec.ttl", format="turtle")
+rdf_graph.parse("./flask_server/linkrec.ttl", format="turtle")
 
 # load in instances of the classes
 instances_graph = Graph()
-instances_graph.parse("./flask-server/instances.ttl", format="turtle")
+instances_graph.parse("./flask_server/instances.ttl", format="turtle")
 
 # combine graphs
 rdf_graph = rdf_graph + instances_graph
@@ -183,18 +184,47 @@ def create_app(test_config=None):
     def graphql_server():
         data = request.get_json()
 
+        query = data['query']
+        sparqlquery = graphql_to_sparql(query)
+
+        headers = []  # Column headers for the table
+        rows = []  # Data rows for the table
+
+        try:
+            # Execute the SPARQL query
+            query_results = rdf_graph.query(sparqlquery)
+
+            # Extract variable names for headers
+            headers = [str(var) for var in query_results.vars]
+
+            # Iterate over the query results and store them
+            rows = [
+                {headers[i]: str(row[i]) for i in range(len(headers))}
+                for row in query_results
+            ]
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        rows = convert_response(rows)
+
+        # Return the results as JSON
+        json = jsonify(rows)
+        return json, 200
+
         # Handle the request
-        success, result = graphql_sync(
-            schema,
-            data,
-            context_value={"request": request},
-            debug=app.debug
-        )
-        status_code = 200 if success else 400
-        for user in users_test_data:
-            print(user)
-            print("\n")
-        return jsonify(result), status_code
+        # success, result = graphql_sync(
+        #     schema,
+        #     data,
+        #     context_value={"request": request},
+        #     debug=app.debug
+        # )
+        # print("result2: ", result)
+        # status_code = 200 if success else 400
+        # # for user in users_test_data:
+        # #     print(user)
+        # #     print("\n")
+        # return jsonify(result), status_code
 
     # a simple page that says hello
     @app.route('/hello')
@@ -252,8 +282,26 @@ def create_app(test_config=None):
 
         # Return the results as JSON
         json = jsonify({"headers": headers, "rows": rows})
-        print(json)
+        #print(json)
         return json
+
+    @app.route('/converttosparql')
+    def convert_to_sparql():
+        query = """
+        query {
+          users {
+            id
+            firstName
+            name
+            location {
+              country
+              city
+            }
+          }
+        }
+        """
+        sparql_query = graphql_to_sparql(query)
+        return jsonify({"sparql_query": sparql_query})
 
 
         
