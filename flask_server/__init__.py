@@ -239,7 +239,7 @@ def create_app(test_config=None):
 
     # GraphQL server route
     @app.route("/getusers", methods=["POST"])
-    @jwt_required
+    # @jwt_required
     def graphql_server():
         data = request.get_json()
 
