@@ -16,6 +16,8 @@ type User {
 type Company {
     id: ID!
     name: String!
+    email: String!
+    password: String!
     location: Location!
     vacancies: [Vacancy]
 }
@@ -84,6 +86,7 @@ type Query {
     users: [User]
     user(id: ID!): User
     userByEmail(email: String!): User
+    companyByEmail(email: String!): Company
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
     activeVacancies(currentDate: Date!): [Vacancy]
@@ -101,6 +104,14 @@ type Mutation {
         location: LocationInput!,
         gender: String!
     ): User
+    
+    createCompany(
+        name: String!,
+        email: String!,
+        password: String!,
+        location: LocationInput!
+    ): Company
+
         # New Mutation for Updating a User
     updateUser(
         id: ID!,

@@ -36,6 +36,33 @@ export const CREATE_USER = gql`
   }
 `;
 
+export const CREATE_COMPANY = gql`
+  mutation CreateUser(
+    $name: String!,
+    $email: String!,
+    $password: String!,
+    $location: LocationInput!
+  ) {
+    createUser(
+      name: $name,
+      email: $email,
+      password: $password,
+      location: $location
+    ) {
+      id
+      name
+      email
+      location {
+        country
+        city
+        cityCode
+        street
+        houseNumber
+      }
+    }
+  }
+`;
+
 export const UPDATE_USER = gql`
   mutation UpdateUser(
     $id: ID!,

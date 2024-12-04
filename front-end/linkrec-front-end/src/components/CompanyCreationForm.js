@@ -1,17 +1,14 @@
 import { Link } from "react-router-dom";
 import React, { useState } from "react";
 import { useMutation, useLazyQuery } from "@apollo/client";
-import { CHECK_USER_EMAIL_EXISTS } from "../GraphQL/queries";
-import { CREATE_USER } from "../GraphQL/mutations";
+import { CHECK_COMPANY_EMAIL_EXISTS } from "../GraphQL/queries";
+import { CREATE_COMPANY } from "../GraphQL/mutations";
 
 function UserCreationForm() {
   const [formData, setFormData] = useState({
-    firstName: "",
     name: "",
     email: "",
     password: "",
-    dateOfBirth: "",
-    gender: "",
     location: {
       country: "",
       city: "",
@@ -22,8 +19,8 @@ function UserCreationForm() {
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const [createUser, { loading, error, data }] = useMutation(CREATE_USER);
-  const [checkUserEmailExists, { loading: emailCheckLoading }] = useLazyQuery(CHECK_USER_EMAIL_EXISTS, {
+  const [createCompany, { loading, error, data }] = useMutation(CREATE_COMPANY);
+  const [checkCompanyEmailExists, { loading: emailCheckLoading }] = useLazyQuery(CHECK_COMPANY_EMAIL_EXISTS, {
     fetchPolicy: "network-only",
   });
 
@@ -65,16 +62,13 @@ function UserCreationForm() {
   };
 
   const handleSubmit = async () => {
-    const { firstName, name, email, password, dateOfBirth, gender, location } = formData;
+    const { name, email, password, location } = formData;
 
     // Ensure required fields are filled
     if (
-      !firstName ||
       !name ||
       !email ||
       !password ||
-      !dateOfBirth ||
-      !gender ||
       !location.country ||
       !location.city ||
       !location.cityCode
@@ -92,7 +86,7 @@ function UserCreationForm() {
 
     // Check if the email exists
     try {
-      const { data: emailData } = await checkUserEmailExists({ variables: { email } });
+      const { data: emailData } = await checkCompanyEmailExists({ variables: { email } });
 
       if (emailData?.userByEmail) {
         alert("Email is already in use. Please use a different email.");
@@ -100,14 +94,11 @@ function UserCreationForm() {
       }
 
       // Create the profile
-      await createUser({
+      await createCompany({
         variables: {
-          firstName,
           name,
           email,
           password,
-          dateOfBirth,
-          gender,
           location,
         },
       });
@@ -132,10 +123,8 @@ function UserCreationForm() {
                 <div className="w-full">
                   <dl className="text-gray-900 divide-y divide-gray-200 dark:text-white dark:divide-gray-700">
                     {[
-                      { id: "firstName", label: "First Name", type: "text", placeholder: "First Name" },
-                      { id: "name", label: "Last Name", type: "text", placeholder: "Last Name" },
+                      { id: "name", label: "Company Name", type: "text", placeholder: "Company Name" },
                       { id: "email", label: "Email", type: "email", placeholder: "Email" },
-                      { id: "dateOfBirth", label: "Date of Birth", type: "date", placeholder: "" },
                     ].map((field) => (
                       <div key={field.id} className="flex flex-col py-3">
                         <label
@@ -155,29 +144,6 @@ function UserCreationForm() {
                         />
                       </div>
                     ))}
-
-                    <div className="flex flex-col py-3">
-                      <label
-                        htmlFor="gender"
-                        className="mb-1 text-gray-500 md:text-lg dark:text-gray-400"
-                      >
-                        Gender
-                      </label>
-                      <select
-                        id="gender"
-                        value={formData.gender}
-                        onChange={handleInputChange}
-                        className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                        required
-                      >
-                        <option value="" disabled>
-                          Select Gender
-                        </option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                        <option value="other">Other</option>
-                      </select>
-                    </div>
 
                     {/* Password with Show/Hide Toggle */}
                     <div className="flex flex-col py-3">

@@ -12,6 +12,7 @@ import Header from "./components/Header";
 import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import UserCreationForm from "./components/UserCreationForm";
+import CompanyCreationForm from "./components/CompanyCreationForm";
 import Users from "./components/Users";
 import Vacancies from "./components/Vacancies";
 import EmptyPage from "./components/EmptyPage";
@@ -52,7 +53,7 @@ function App() {
                 </>
               }
             />
-            {/* <Route
+            <Route
               exact
               path="/registration"
               element={
@@ -60,13 +61,22 @@ function App() {
                   <RegisterForm />
                 </>
               }
-            /> */}
+            />
             <Route
               exact
-              path="/registration"
+              path="/createUser"
               element={
                 <>
                   <UserCreationForm />
+                </>
+              }
+            />
+            <Route
+              exact
+              path="/createBusiness"
+              element={
+                <>
+                  <CompanyCreationForm />
                 </>
               }
             />

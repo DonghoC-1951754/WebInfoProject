@@ -19,9 +19,35 @@ export const GET_USERS = gql`
   }
 `;
 
-export const CHECK_EMAIL_EXISTS = gql`
-  query CheckEmailExists($email: String!) {
+export const GET_COMPANIES = gql`
+  query {
+    users {
+      id
+      name
+      email
+      location {
+        country
+        city
+        cityCode
+        street
+        houseNumber
+      }
+    }
+  }
+`;
+
+
+export const CHECK_USER_EMAIL_EXISTS = gql`
+  query CheckUserEmailExists($email: String!) {
     userByEmail(email: $email) {
+      id
+    }
+  }
+`;
+
+export const CHECK_COMPANY_EMAIL_EXISTS = gql`
+  query CheckCompanyEmailExists($email: String!) {
+    companyByEmail(email: $email) {
       id
     }
   }
