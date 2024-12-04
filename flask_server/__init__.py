@@ -11,8 +11,11 @@ from os import environ as env
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
 from flask_server.convert_graphql import graphql_to_sparql, convert_response
+import jwt
+from jwt.exceptions import InvalidTokenError
+from jwt import PyJWKClient
 
-
+oauth = OAuth()
 # load in the RDF graph
 rdf_graph = Graph()
 rdf_graph.parse("./flask_server/linkrec.ttl", format="turtle")
@@ -46,6 +49,7 @@ def parse_date(value):
         raise ValueError(f"Invalid date format: {value}, expected 'YYYY-MM-DD'")
 
 
+
 def create_app(test_config=None):
     ENV_FILE = find_dotenv()
     if ENV_FILE:
@@ -65,7 +69,7 @@ def create_app(test_config=None):
     app.secret_key = env.get("APP_SECRET_KEY")
     oauth = OAuth(app)
     oauth.register(
-        "auth0",
+        "auth_client",
         client_id=env.get("AUTH0_CLIENT_ID"),
         client_secret=env.get("AUTH0_CLIENT_SECRET"),
         client_kwargs={
@@ -73,6 +77,41 @@ def create_app(test_config=None):
         },
         server_metadata_url=f'https://{env.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
     )
+
+    
+    def jwt_required(func):
+        def wrapper(*args, **kwargs):
+            # Get token from Authorization header
+            auth_header = request.headers.get("Authorization", None)
+            if not auth_header:
+                return jsonify({"message": "Authorization header is missing"}), 401
+
+            try:
+                token = auth_header.split(" ")[1]  # Assuming format: "Bearer <token>"
+            except IndexError:
+                return jsonify({"message": "Bearer token is missing"}), 401
+
+            try:
+                jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+                signing_key = jwks_client.get_signing_key_from_jwt(token)
+                claims = jwt.decode(
+                    token,
+                    signing_key.key,
+                    algorithms=["RS256"],
+                    issuer="https://webinfoproject.eu.auth0.com/",
+                    audience="https://auth0-graphql-api"
+                )
+                # Store the decoded token's data in the request context
+                request.user = claims
+
+            except InvalidTokenError as e:
+                return jsonify({"message": f"Invalid token: {str(e)}"}), 401
+            except Exception as e:
+                return jsonify({"message": f"Token error: {str(e)}"}), 401
+
+        # If token is valid, continue to the actual endpoint
+            return func(*args, **kwargs)
+        return wrapper
     
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -207,6 +246,7 @@ def create_app(test_config=None):
 
     # GraphQL server route
     @app.route("/getusers", methods=["POST"])
+    @jwt_required
     def graphql_server():
         data = request.get_json()
 
