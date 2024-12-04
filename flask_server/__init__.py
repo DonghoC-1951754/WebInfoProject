@@ -85,13 +85,9 @@ def create_app(test_config=None):
             auth_header = request.headers.get("Authorization", None)
             if not auth_header:
                 return jsonify({"message": "Authorization header is missing"}), 401
-
             try:
-                token = auth_header.split(" ")[1]  # Assuming format: "Bearer <token>"
-            except IndexError:
-                return jsonify({"message": "Bearer token is missing"}), 401
-
-            try:
+                token = auth_header.split(" ")[1]
+                # Public Key: https://webinfoproject.eu.auth0.com/.well-known/jwks.json
                 jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
                 signing_key = jwks_client.get_signing_key_from_jwt(token)
                 claims = jwt.decode(
@@ -103,11 +99,8 @@ def create_app(test_config=None):
                 )
                 # Store the decoded token's data in the request context
                 request.user = claims
-
-            except InvalidTokenError as e:
-                return jsonify({"message": f"Invalid token: {str(e)}"}), 401
             except Exception as e:
-                return jsonify({"message": f"Token error: {str(e)}"}), 401
+                return jsonify({"message": f"Authentication failed!"}), 401
 
         # If token is valid, continue to the actual endpoint
             return func(*args, **kwargs)
