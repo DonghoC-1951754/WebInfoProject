@@ -317,27 +317,6 @@ def create_app(test_config=None):
         json = jsonify(rows)
         return json, 200
 
-    # OAuth login
-    @app.route("/login")
-    def login():
-        return oauth.auth0.authorize_redirect(
-            redirect_uri=url_for("callback", _external=True)
-        )
-
-    @app.route("/callback", methods=["GET", "POST"])
-    def callback():
-        token = oauth.auth0.authorize_access_token()
-        session["user"] = token
-        return redirect("hello")
-
-    # @app.route("/homepage")
-    # def home():
-    #     return render_template("http://localhost:3000/", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
-    
-    @app.route('/logout')
-    def logout():
-        session.clear()  # Clears the session
-        return redirect('/')
 
     # a simple page that says hello
     @app.route('/hello')
