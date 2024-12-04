@@ -16,9 +16,25 @@ import CompanyCreationForm from "./components/CompanyCreationForm";
 import Users from "./components/Users";
 import Vacancies from "./components/Vacancies";
 import EmptyPage from "./components/EmptyPage";
+import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(true);
+
+  
+  const userclient = new ApolloClient({
+    uri: " http://127.0.0.1:5000/getusers", // Replace with your GraphQL API endpoint
+    cache: new InMemoryCache({
+      addTypename: false, // Disable __typename
+    }),
+  });
+
+  const vacancyclient = new ApolloClient({
+    uri: " http://127.0.0.1:5000/getvacancies", // Replace with your GraphQL API endpoint
+    cache: new InMemoryCache({
+      addTypename: false, // Disable __typename
+    }),
+  });
 
   useEffect(() => {
     const userToken = localStorage.getItem("userToken");
@@ -84,9 +100,9 @@ function App() {
               exact
               path="/profiles"
               element={
-                <>
-                  <Users />
-                </>
+                <ApolloProvider client={userclient}>
+                    <Users />
+                </ApolloProvider>
               }
             />
             <Route
@@ -95,7 +111,9 @@ function App() {
               element={
                 <>
                   {isLoggedIn ? (
-                    <Vacancies/>
+                    <ApolloProvider client={userclient}>
+                      <Vacancies />
+                    </ApolloProvider>
                   ) : (
                     <EmptyPage/>
                   )}

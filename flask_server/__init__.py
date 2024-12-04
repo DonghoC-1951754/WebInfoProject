@@ -180,7 +180,7 @@ def create_app(test_config=None):
     #     return ExplorerGraphiQL().render()
 
     # GraphQL server route
-    @app.route("/graphql", methods=["POST"])
+    @app.route("/getusers", methods=["POST"])
     def graphql_server():
         data = request.get_json()
 
@@ -225,6 +225,38 @@ def create_app(test_config=None):
         # #     print(user)
         # #     print("\n")
         # return jsonify(result), status_code
+
+    @app.route("/getvacancies", methods=["POST"])
+    def getvacancies():
+        data = request.get_json()
+
+        query = data['query']
+        sparqlquery = graphql_to_sparql(query)
+
+        headers = []  # Column headers for the table
+        rows = []  # Data rows for the table
+
+        try:
+            # Execute the SPARQL query
+            query_results = rdf_graph.query(sparqlquery)
+
+            # Extract variable names for headers
+            headers = [str(var) for var in query_results.vars]
+
+            # Iterate over the query results and store them
+            rows = [
+                {headers[i]: str(row[i]) for i in range(len(headers))}
+                for row in query_results
+            ]
+
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+
+        rows = convert_response(rows)
+
+        # Return the results as JSON
+        json = jsonify(rows)
+        return json, 200
 
     # a simple page that says hello
     @app.route('/hello')
@@ -302,8 +334,3 @@ def create_app(test_config=None):
         """
         sparql_query = graphql_to_sparql(query)
         return jsonify({"sparql_query": sparql_query})
-
-
-        
-
-    return app
