@@ -3,9 +3,13 @@ import bcrypt
 import datetime
 from ariadne import gql, load_schema_from_path, QueryType, MutationType, graphql_sync, make_executable_schema, ScalarType
 from ariadne.explorer import ExplorerGraphiQL
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, url_for, redirect, session
 from flask_cors import CORS
 from rdflib import Graph, Namespace, RDF, Literal
+from flask_jwt_extended import JWTManager, verify_jwt_in_request
+from os import environ as env
+from authlib.integrations.flask_client import OAuth
+from dotenv import find_dotenv, load_dotenv
 from flask_server.convert_graphql import graphql_to_sparql, convert_response
 
 
@@ -43,13 +47,33 @@ def parse_date(value):
 
 
 def create_app(test_config=None):
+    ENV_FILE = find_dotenv()
+    if ENV_FILE:
+        load_dotenv(ENV_FILE)
+        print ("Loaded .env file")
+    else:
+        print ("No .env file found")
+
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    )
 
+    # app.config.from_mapping(
+    #     SECRET_KEY='dev',
+    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+    # )
+    app.secret_key = env.get("APP_SECRET_KEY")
+    oauth = OAuth(app)
+    oauth.register(
+        "auth0",
+        client_id=env.get("AUTH0_CLIENT_ID"),
+        client_secret=env.get("AUTH0_CLIENT_SECRET"),
+        client_kwargs={
+            "scope": "openid profile email",
+        },
+        server_metadata_url=f'https://{env.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
+    )
+    
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
@@ -60,6 +84,8 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    
 
     CORS(app)
 
@@ -258,12 +284,32 @@ def create_app(test_config=None):
         json = jsonify(rows)
         return json, 200
 
+    # OAuth login
+    @app.route("/login")
+    def login():
+        return oauth.auth0.authorize_redirect(
+            redirect_uri=url_for("callback", _external=True)
+        )
+
+    @app.route("/callback", methods=["GET", "POST"])
+    def callback():
+        token = oauth.auth0.authorize_access_token()
+        session["user"] = token
+        return redirect("hello")
+
+    # @app.route("/homepage")
+    # def home():
+    #     return render_template("http://localhost:3000/", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
+    
+    @app.route('/logout')
+    def logout():
+        session.clear()  # Clears the session
+        return redirect('/')
+
     # a simple page that says hello
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
-
-    from flask import jsonify
 
     @app.route('/sparql')
     def sparql_query():
@@ -334,3 +380,4 @@ def create_app(test_config=None):
         """
         sparql_query = graphql_to_sparql(query)
         return jsonify({"sparql_query": sparql_query})
+    return app
