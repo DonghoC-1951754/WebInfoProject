@@ -135,6 +135,15 @@ def create_app(test_config=None):
         {"id": "6", "firstName": "Jos", "name": "Brinkie", "email": "jos.brinkie@example.com", "location": {"country": "USA", "city": "Chicago", "cityCode": 60601}, "gender": "Male", "dateOfBirth": "1988-11-28", "password": "hashedPassword6"},
     ]
 
+    companies_test_data = [
+        {"id":"1","name":"TechCorp","email":"info@techcorp.com","password":"hashedPassword1","location":{"country":"USA","city":"San Francisco","cityCode":"94107","street":"Market Street","houseNumber":"123"}},
+        {"id":"2","name":"GreenLife","email":"contact@greenlife.org","password":"hashedPassword2","location":{"country":"Canada","city":"Toronto","cityCode":"M5G 1P5","street":"Queen Street","houseNumber":"456"}},
+        {"id":"3","name":"Innovatech","email":"support@innovatech.io","password":"hashedPassword3","location":{"country":"Germany","city":"Berlin","cityCode":"10117","street":"Unter den Linden","houseNumber":"789"}},
+        {"id":"4","name":"EduLearn","email":"hello@edulearn.edu","password":"hashedPassword4","location":{"country":"Netherlands","city":"Amsterdam","cityCode":"1011","street":"Damrak","houseNumber":"12A"}},
+        {"id":"5","name":"HealthPlus","email":"care@healthplus.com","password":"hashedPassword5","location":{"country":"UK","city":"London","cityCode":"EC1A 1BB","street":"Bishopsgate","houseNumber":"202"}},
+        {"id":"6","name":"AgriWorld","email":"info@agriworld.net","password":"hashedPassword6","location":{"country":"Australia","city":"Sydney","cityCode":"2000","street":"George Street","houseNumber":"88"}}
+    ]
+
     vacancies_test_data = [
         # id = 1, 4 and 6 are active vacancies
         {"id": "1", "jobTitle": "Software Engineer", "company": {"name": "Google", "location": {"country": "USA", "city": "New York", "cityCode": 10001}}, "requiredSkills": ["Python", "JavaScript", "React"], "startDate": datetime.date(2024, 3, 1), "endDate": datetime.date(2024, 12, 31)},
@@ -196,7 +205,29 @@ def create_app(test_config=None):
         }
         users_test_data.append(new_user)
         return new_user
-
+    
+    @mutation.field("createCompany")
+    def resolve_create_company(_, info,name, email, password, location):
+        # Check if the email already exists
+        if any(user["email"] == email for user in companies_test_data):
+            raise Exception(f"user with email '{email}' already exists.")
+        
+        # Hash the password before saving it
+        hashed_password = hash_password(password)
+        
+        # Create the new user
+        new_id = str(len(users_test_data) + 1)
+        new_company = {
+            "id": new_id,
+            "name": name,
+            "email": email,
+            "password": hashed_password,  # Save the hashed password
+            "location": location,
+            "vacancies": []
+        }
+        companies_test_data.append(new_company)
+        return new_company
+    
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
     def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, password=None, educations=None, experiences=None):
