@@ -112,7 +112,7 @@ function App() {
             />
             <Route
               exact
-              path="/createBusiness"
+              path="/createCompany"
               element={
                 <>
                   <CompanyCreationForm />
