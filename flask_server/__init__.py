@@ -3,12 +3,20 @@ import bcrypt
 import datetime
 from ariadne import gql, load_schema_from_path, QueryType, MutationType, graphql_sync, make_executable_schema, ScalarType
 from ariadne.explorer import ExplorerGraphiQL
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, url_for, redirect, session
 from flask_cors import CORS
 from rdflib import Graph, Namespace, RDF, Literal
 from flask_server.convert_graphql import graphql_to_sparql, convert_response, filter_query_vacancies_current_date
+from flask_jwt_extended import JWTManager, verify_jwt_in_request
+from os import environ as env
+from authlib.integrations.flask_client import OAuth
+from dotenv import find_dotenv, load_dotenv
+from flask_server.convert_graphql import graphql_to_sparql, convert_response
+import jwt
+from jwt.exceptions import InvalidTokenError
+from jwt import PyJWKClient
 
-
+oauth = OAuth()
 # load in the RDF graph
 rdf_graph = Graph()
 rdf_graph.parse("./flask_server/linkrec.ttl", format="turtle")
@@ -116,14 +124,63 @@ def parse_date(value):
         raise ValueError(f"Invalid date format: {value}, expected 'YYYY-MM-DD'")
 
 
+
 def create_app(test_config=None):
+    ENV_FILE = find_dotenv()
+    if ENV_FILE:
+        load_dotenv(ENV_FILE)
+        print ("Loaded .env file")
+    else:
+        print ("No .env file found")
+
+
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-    app.config.from_mapping(
-        SECRET_KEY='dev',
-        DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+
+    # app.config.from_mapping(
+    #     SECRET_KEY='dev',
+    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
+    # )
+    app.secret_key = env.get("APP_SECRET_KEY")
+    oauth = OAuth(app)
+    oauth.register(
+        "auth_client",
+        client_id=env.get("AUTH0_CLIENT_ID"),
+        client_secret=env.get("AUTH0_CLIENT_SECRET"),
+        client_kwargs={
+            "scope": "openid profile email",
+        },
+        server_metadata_url=f'https://{env.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
     )
 
+    
+    def jwt_required(func):
+        def wrapper(*args, **kwargs):
+            # Get token from Authorization header
+            auth_header = request.headers.get("Authorization", None)
+            if not auth_header:
+                return jsonify({"message": "Authorization header is missing"}), 401
+            try:
+                token = auth_header.split(" ")[1]
+                # Public Key: https://webinfoproject.eu.auth0.com/.well-known/jwks.json
+                jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+                signing_key = jwks_client.get_signing_key_from_jwt(token)
+                claims = jwt.decode(
+                    token,
+                    signing_key.key,
+                    algorithms=["RS256"],
+                    issuer="https://webinfoproject.eu.auth0.com/",
+                    audience="https://auth0-graphql-api"
+                )
+                # Store the decoded token's data in the request context
+                request.user = claims
+            except Exception as e:
+                return jsonify({"message": f"Authentication failed!"}), 401
+
+        # If token is valid, continue to the actual endpoint
+            return func(*args, **kwargs)
+        return wrapper
+    
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
@@ -134,6 +191,8 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    
 
     CORS(app)
 
@@ -149,6 +208,15 @@ def create_app(test_config=None):
         {"id": "4", "firstName": "Danny", "name": "Dirk", "email": "danny.dirk@example.com", "location": {"country": "Netherlands", "city": "Amsterdam", "cityCode": 2000}, "gender": "Male", "dateOfBirth": "1982-09-01", "password": "hashedPassword4"},
         {"id": "5", "firstName": "Tom", "name": "Jerry", "email": "tom.jerry@example.com", "location": {"country": "USA", "city": "Los Angeles", "cityCode": 90001}, "gender": "Male", "dateOfBirth": "1992-05-14", "password": "hashedPassword5"},
         {"id": "6", "firstName": "Jos", "name": "Brinkie", "email": "jos.brinkie@example.com", "location": {"country": "USA", "city": "Chicago", "cityCode": 60601}, "gender": "Male", "dateOfBirth": "1988-11-28", "password": "hashedPassword6"},
+    ]
+
+    companies_test_data = [
+        {"id":"1","name":"TechCorp","email":"info@techcorp.com","password":"hashedPassword1","location":{"country":"USA","city":"San Francisco","cityCode":"94107","street":"Market Street","houseNumber":"123"}},
+        {"id":"2","name":"GreenLife","email":"contact@greenlife.org","password":"hashedPassword2","location":{"country":"Canada","city":"Toronto","cityCode":"M5G 1P5","street":"Queen Street","houseNumber":"456"}},
+        {"id":"3","name":"Innovatech","email":"support@innovatech.io","password":"hashedPassword3","location":{"country":"Germany","city":"Berlin","cityCode":"10117","street":"Unter den Linden","houseNumber":"789"}},
+        {"id":"4","name":"EduLearn","email":"hello@edulearn.edu","password":"hashedPassword4","location":{"country":"Netherlands","city":"Amsterdam","cityCode":"1011","street":"Damrak","houseNumber":"12A"}},
+        {"id":"5","name":"HealthPlus","email":"care@healthplus.com","password":"hashedPassword5","location":{"country":"UK","city":"London","cityCode":"EC1A 1BB","street":"Bishopsgate","houseNumber":"202"}},
+        {"id":"6","name":"AgriWorld","email":"info@agriworld.net","password":"hashedPassword6","location":{"country":"Australia","city":"Sydney","cityCode":"2000","street":"George Street","houseNumber":"88"}}
     ]
 
     vacancies_test_data = [
@@ -213,7 +281,29 @@ def create_app(test_config=None):
         }
         users_test_data.append(new_user)
         return new_user
-
+    
+    @mutation.field("createCompany")
+    def resolve_create_company(_, info,name, email, password, location):
+        # Check if the email already exists
+        if any(user["email"] == email for user in companies_test_data):
+            raise Exception(f"user with email '{email}' already exists.")
+        
+        # Hash the password before saving it
+        hashed_password = hash_password(password)
+        
+        # Create the new user
+        new_id = str(len(users_test_data) + 1)
+        new_company = {
+            "id": new_id,
+            "name": name,
+            "email": email,
+            "password": hashed_password,  # Save the hashed password
+            "location": location,
+            "vacancies": []
+        }
+        companies_test_data.append(new_company)
+        return new_company
+    
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
     def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, password=None, educations=None, experiences=None):
@@ -256,6 +346,7 @@ def create_app(test_config=None):
 
     # GraphQL server route
     @app.route("/getusers", methods=["POST"])
+    # @jwt_required
     def graphql_server():
         data = request.get_json()
 
@@ -354,8 +445,6 @@ def create_app(test_config=None):
     def hello():
         return 'Hello, World!'
 
-    from flask import jsonify
-
     @app.route('/sparql')
     def sparql_query():
         query = """
@@ -425,5 +514,6 @@ def create_app(test_config=None):
         """
         sparql_query = graphql_to_sparql(query)
         return jsonify({"sparql_query": sparql_query})
+    return app
 
     return app

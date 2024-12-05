@@ -1,0 +1,9 @@
+POST https://webinfoproject.eu.auth0.com/oauth/token HTTP/1.1
+Content-Type: application/json
+
+{
+  "client_id": "p44ZPot04hccnnkPGtx7ELWEZvym0yDi",
+  "client_secret": "VjQKkQLd_vopEq5ZVGC6KW8ZCIF7l427WC1GxVeEOUPzsgZ4LGUQkmFq1i32qk4E",
+  "audience": "https://auth0-graphql-api",
+  "grant_type": "client_credentials"
+}
