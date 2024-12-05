@@ -36,7 +36,7 @@ type Education {
 }
 
 type Experience {
-    companyName: Company!
+    company: Company!
     jobTitle: String!
     startDate: String
     endDate: String

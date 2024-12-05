@@ -33,6 +33,81 @@ EX = Namespace("http://example.org/")
 # Define a custom Date scalar
 date_scalar = ScalarType("Date")
 
+def get_user_by_id(id):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
+           (GROUP_CONCAT(DISTINCT COALESCE(?educationDetails, "No education details available"); separator=", ") AS ?educations)
+           (GROUP_CONCAT(DISTINCT COALESCE(?experienceDetails, "No experience details available"); separator=", ") AS ?experiences)
+    WHERE {{
+      ?user a ex:User ;
+            ex:id ?id ;
+            ex:firstName ?firstName ;
+            ex:name ?name ;
+            ex:email ?email ;
+            ex:dateOfBirth ?dateOfBirth ;
+            ex:gender ?gender ;
+            ex:location ?location .
+
+      ?location ex:country ?country ;
+                ex:city ?city ;
+                ex:cityCode ?cityCode ;
+                ex:street ?street ;
+                ex:houseNumber ?houseNumber .
+
+      OPTIONAL {{
+        ?education ex:institution ?institution ;
+                   ex:degree ?degree ;
+                   ex:fieldOfStudy ?fieldOfStudy ;
+                   ex:yearGraduated ?yearGraduated .
+        BIND(CONCAT(?institution, " (", ?degree, ", ", ?fieldOfStudy, ", ", ?yearGraduated, ")") AS ?educationDetails)
+      }}
+
+      OPTIONAL {{
+        ?experience ex:companyName ?companyName ;
+                    ex:jobTitle ?jobTitle ;
+                    ex:startDate ?startDate ;
+                    ex:endDate ?endDate ;
+                    ex:description ?description .
+        BIND(CONCAT(?companyName, " (", ?jobTitle, ", ", ?startDate, " - ", ?endDate, "): ", ?description) AS ?experienceDetails)
+      }}
+
+      FILTER (?id = "{id}")
+    }}
+    GROUP BY ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
+    """
+
+    query_results = rdf_graph.query(query)
+
+    if not query_results:
+        return None
+    
+    user = {}
+
+    for row in query_results:
+        user = {
+            "id": str(row["id"]),
+            "firstName": str(row["firstName"]),
+            "name": str(row["name"]),
+            "email": str(row["email"]),
+            "dateOfBirth": row["dateOfBirth"].toPython(),
+            "location": {
+                "country": str(row["country"]),
+                "city": str(row["city"]),
+                "cityCode": str(row["cityCode"]),
+                "street": str(row["street"]),
+                "houseNumber": str(row["houseNumber"])
+            },
+            "gender": str(row["gender"]),
+            "educations": [],
+            "experiences": []
+        }
+
+    return user
+
+
+
 def get_all_vacancies():
     query = """
     PREFIX ex: <http://example.com/schema#>
@@ -235,6 +310,7 @@ def create_app(test_config=None):
     # Resolver for `user` query
     @query.field("user")
     def resolve_user(_, info, id):
+        return get_user_by_id(id)
         return next((user for user in users_test_data if user["id"] == id), None)
     
     # Resolver for `userByEmail` query
@@ -243,7 +319,7 @@ def create_app(test_config=None):
         return next((user for user in users_test_data if user["email"] == email), None)
 
     @query.field("activeVacancies")
-    def resolve_active_vacancies(first, info, currentDate):
+    def resolve_active_vacancies(_, info, currentDate):
         return get_all_vacancies()
         #return [vacancy for vacancy in vacancies_test_data if vacancy["startDate"] <= currentDate <= vacancy["endDate"]]
 
@@ -375,6 +451,23 @@ def create_app(test_config=None):
         # Return the results as JSON
         json = jsonify(rows)
         return json, 200
+
+    @app.route("/getuserbyid", methods=["POST"])
+    def getuserbyid():
+        data = request.get_json()
+
+        #Handle the request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value={"request": request},
+            debug=app.debug
+        )
+        status_code = 200 if success else 400
+        # for user in users_test_data:
+        #     print(user)
+        #     print("\n")
+        return jsonify(result), status_code
 
 
     @app.route("/getvacancies", methods=["POST"])

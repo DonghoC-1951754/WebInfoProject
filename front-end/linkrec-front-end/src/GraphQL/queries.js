@@ -59,7 +59,9 @@ export const GET_USER_BY_ID = gql`
         yearGraduated
       }
       experiences {
-        companyName
+        company {
+          name
+        }
         jobTitle
         startDate
         endDate

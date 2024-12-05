@@ -86,17 +86,3 @@ def convert_response_companies(sparqlrows):
 
     return outer
 
-# Example GraphQL query
-graphql_query = """
-query {
-  users {
-    id
-    firstName
-    name
-    location {
-      country
-      city
-    }
-  }
-}
-"""

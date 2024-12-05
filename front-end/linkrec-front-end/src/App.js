@@ -38,6 +38,20 @@ function App() {
     }),
   });
 
+  const userbyidclient = new ApolloClient({
+    uri: " http://127.0.0.1:5000/getuserbyid", // Replace with your GraphQL API endpoint
+    cache: new InMemoryCache({
+      addTypename: false, // Disable __typename
+    }),
+  });
+
+  const companybyidclient = new ApolloClient({
+    uri: " http://127.0.0.1:5000/getcompanybyid", // Replace with your GraphQL API endpoint
+    cache: new InMemoryCache({
+      addTypename: false, // Disable __typename
+    }),
+  });
+
   useEffect(() => {
     const userToken = localStorage.getItem("userToken");
     if (userToken) {
@@ -111,7 +125,7 @@ function App() {
               exact
               path="/companyProfile"
               element={
-                <ApolloProvider client={userclient}>
+                <ApolloProvider client={companybyidclient}>
                     <CompanyProfile />
                 </ApolloProvider>
               }
@@ -120,7 +134,7 @@ function App() {
               exact
               path="/userProfile/:id"
               element={
-                <ApolloProvider client={userclient}>
+                <ApolloProvider client={userbyidclient}>
                     <UserProfile />
                 </ApolloProvider>
               }
