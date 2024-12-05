@@ -14,6 +14,8 @@ from dotenv import find_dotenv, load_dotenv
 import jwt
 from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
+import random
+import string
 
 oauth = OAuth()
 # load in the RDF graph
@@ -33,14 +35,61 @@ EX = Namespace("http://example.org/")
 # Define a custom Date scalar
 date_scalar = ScalarType("Date")
 
+def check_email(email):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?email
+    WHERE {{
+
+      ?user a ex:User ;
+            ex:email ?email .
+
+      FILTER (?email = "{email}")
+    }}
+    """
+
+    query_results = rdf_graph.query(query)
+
+    return len(query_results) == 0
+
+def add_new_user(user):
+    # Create a new user node
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT DATA {{
+        ex:{user["id"]} a ex:User ;
+            ex:id "{user["id"]}" ;
+            ex:firstName "{user["firstName"]}" ;
+            ex:name "{user["name"]}" ;
+            ex:email "{user["email"]}" ;
+            ex:password "{user["password"]}" ;
+            ex:dateOfBirth "{user["dateOfBirth"]}"^^xsd:date ;
+            ex:gender "{user["gender"]}" ;
+            ex:location [ a ex:Location ;
+                            ex:country "{user["location"]["country"]}" ;
+                            ex:city "{user["location"]["city"]}" ;
+                            ex:cityCode "{user["location"]["cityCode"]}" ;
+                            ex:street "{user["location"]["street"]}" ;
+                            ex:houseNumber "{user["location"]["houseNumber"]}" ] ;
+        }}"""
+
+    rdf_graph.update(query)
+
+    return user
+
+
 def get_user_by_id(id):
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
     WHERE {{
       ?user a ex:User ;
-            ex:id ?id ;
+            ex:id "{id}" ;
             ex:firstName ?firstName ;
             ex:name ?name ;
             ex:email ?email ;
@@ -53,10 +102,7 @@ def get_user_by_id(id):
                 ex:cityCode ?cityCode ;
                 ex:street ?street ;
                 ex:houseNumber ?houseNumber .
-
-      FILTER (?id = "{id}")
     }}
-    GROUP BY ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
     """
 
     # get the education of the user
@@ -100,7 +146,7 @@ def get_user_by_id(id):
 
     for row in query_results:
         user = {
-            "id": str(row["id"]),
+            "id": id,
             "firstName": str(row["firstName"]),
             "name": str(row["name"]),
             "email": str(row["email"]),
@@ -138,8 +184,6 @@ def get_user_by_id(id):
             "description": str(row["description"])
         }
         user["experiences"].append(experience)
-
-    print(user)
 
     return user
 
@@ -347,7 +391,6 @@ def create_app(test_config=None):
     # Resolver for `companies` query
     @query.field("companies")
     def resolve_companies(_, info):
-        print("hier")
         return companies_test_data
 
     # Resolver for `user` query
@@ -375,15 +418,17 @@ def create_app(test_config=None):
     # Resolver for `createuser` mutation
     @mutation.field("createUser")
     def resolve_create_user(_, info, firstName, name, email, password, dateOfBirth, location, gender):
-        # Check if the email already exists
-        if any(user["email"] == email for user in users_test_data):
+
+        if not check_email(email):
             raise Exception(f"user with email '{email}' already exists.")
         
         # Hash the password before saving it
         hashed_password = hash_password(password)
         
         # Create the new user
-        new_id = str(len(users_test_data) + 1)
+
+
+        new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
         new_user = {
             "id": new_id,
             "firstName": firstName,
@@ -396,7 +441,7 @@ def create_app(test_config=None):
             "educations": [],
             "experiences": []
         }
-        users_test_data.append(new_user)
+        new_user = add_new_user(new_user)
         return new_user
     
     @mutation.field("createCompany")
@@ -546,10 +591,50 @@ def create_app(test_config=None):
         #     print("\n")
         return jsonify(result), status_code
 
+    @app.route("/createuser", methods=["POST"])
+    def createuser():
+        data = request.get_json()
+
+        #Handle the request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value={"request": request},
+            debug=app.debug
+        )
+        status_code = 200 if success else 400
+        # for user in users_test_data:
+        #     print(user)
+        #     print("\n")
+        return jsonify(result), status_code
+
     # a simple page that says hello
     @app.route('/hello')
-    @jwt_required
+    # @jwt_required
     def hello():
+        # get all users
+        query = """
+        PREFIX ex: <http://example.com/schema#>
+
+        SELECT ?user
+        WHERE {
+            ?user a ex:User;
+                ex:id "h";
+                ex:firstName ?firstName ;
+                ex:name ?name ;
+                ex:email ?email ;
+                ex:password ?password ;
+                ex:dateOfBirth ?dateOfBirth ;
+                ex:gender ?gender ;
+                ex:location ?location .
+            ?location ex:country ?country ;
+                ex:city ?city ;
+                ex:cityCode ?cityCode ;
+                ex:street ?street ;
+                ex:houseNumber ?houseNumber .
+        }
+        """
+        query_results = rdf_graph.query(query)
         return 'Hello, World!'
 
 

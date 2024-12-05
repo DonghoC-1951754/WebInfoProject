@@ -52,6 +52,13 @@ function App() {
     }),
   });
 
+  const createuserclient = new ApolloClient({
+    uri: " http://127.0.0.1:5000/createuser", // Replace with your GraphQL API endpoint
+    cache: new InMemoryCache({
+      addTypename: false, // Disable __typename
+    }),
+  });
+
   useEffect(() => {
     const userToken = localStorage.getItem("userToken");
     if (userToken) {
@@ -98,9 +105,9 @@ function App() {
               exact
               path="/createUser"
               element={
-                <>
+                <ApolloProvider client={createuserclient}>
                   <UserCreationForm />
-                </>
+                </ ApolloProvider>
               }
             />
             <Route
