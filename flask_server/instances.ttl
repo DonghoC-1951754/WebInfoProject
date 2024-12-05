@@ -93,21 +93,21 @@ ex:Company2 a ex:Company ;
 
 ### Example Experiences
 ex:Experience1 a ex:Experience ;
-    ex:companyName ex:Company1 ;
+    ex:Company ex:Company1 ;
     ex:jobTitle "Software Engineer" ;
     ex:startDate "2010-08-01"^^xsd:date ;
     ex:endDate "2015-12-31"^^xsd:date ;
     ex:description "Developed scalable web applications." .
 
 ex:Experience2 a ex:Experience ;
-    ex:companyName ex:Company2 ;
+    ex:Company ex:Company2 ;
     ex:jobTitle "Data Scientist" ;
     ex:startDate "2016-01-01"^^xsd:date ;
     ex:endDate "2020-06-30"^^xsd:date ;
     ex:description "Analyzed large datasets to derive insights." .
 
 ex:Experience3 a ex:Experience ;
-    ex:companyName ex:Company1 ;
+    ex:Company ex:Company1 ;
     ex:jobTitle "Project Manager" ;
     ex:startDate "2020-07-01"^^xsd:date ;
     ex:description "Led cross-functional teams on AI projects." .

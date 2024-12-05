@@ -170,7 +170,7 @@ ex:yearGraduated a owl:DatatypeProperty ;
     rdfs:comment "The year the user graduated." .
 
 # Experience properties
-ex:companyName a owl:ObjectProperty ;
+ex:company a owl:ObjectProperty ;
     rdfs:domain ex:Experience ;
     rdfs:range ex:Company ;
     rdfs:label "companyName" ;

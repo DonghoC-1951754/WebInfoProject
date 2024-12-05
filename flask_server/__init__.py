@@ -38,8 +38,6 @@ def get_user_by_id(id):
     PREFIX ex: <http://example.com/schema#>
 
     SELECT ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
-           (GROUP_CONCAT(DISTINCT COALESCE(?educationDetails, "No education details available"); separator=", ") AS ?educations)
-           (GROUP_CONCAT(DISTINCT COALESCE(?experienceDetails, "No experience details available"); separator=", ") AS ?experiences)
     WHERE {{
       ?user a ex:User ;
             ex:id ?id ;
@@ -56,32 +54,47 @@ def get_user_by_id(id):
                 ex:street ?street ;
                 ex:houseNumber ?houseNumber .
 
-      OPTIONAL {{
-        ?education ex:institution ?institution ;
-                   ex:degree ?degree ;
-                   ex:fieldOfStudy ?fieldOfStudy ;
-                   ex:yearGraduated ?yearGraduated .
-        BIND(CONCAT(?institution, " (", ?degree, ", ", ?fieldOfStudy, ", ", ?yearGraduated, ")") AS ?educationDetails)
-      }}
-
-      OPTIONAL {{
-        ?experience ex:companyName ?companyName ;
-                    ex:jobTitle ?jobTitle ;
-                    ex:startDate ?startDate ;
-                    ex:endDate ?endDate ;
-                    ex:description ?description .
-        BIND(CONCAT(?companyName, " (", ?jobTitle, ", ", ?startDate, " - ", ?endDate, "): ", ?description) AS ?experienceDetails)
-      }}
-
       FILTER (?id = "{id}")
     }}
     GROUP BY ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
     """
 
-    query_results = rdf_graph.query(query)
+    # get the education of the user
+    queryEducation = f"""
+    PREFIX ex: <http://example.com/schema#>
+    
+    SELECT ?institution ?degree ?fieldOfStudy ?yearGraduated
+    WHERE {{
+        ?user a ex:User ;
+                ex:id "{id}" ;
+                ex:educations ?education .
+        ?education ex:institution ?institution ;
+                     ex:degree ?degree ;
+                     ex:fieldOfStudy ?fieldOfStudy ;
+                     ex:yearGraduated ?yearGraduated .  
+    }}
+    """
 
-    if not query_results:
-        return None
+    queryExperience = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?companyName ?jobTitle ?startDate ?endDate ?description
+    WHERE {{
+        ?user a ex:User ;
+                ex:id "{id}" ;
+                ex:experiences ?experience .
+        ?experience ex:Company ?company ;
+                    ex:jobTitle ?jobTitle ;
+                    ex:startDate ?startDate ;
+                    ex:description ?description .
+        OPTIONAL {{ ?experience ex:endDate ?endDate . }}
+        ?company ex:name ?companyName .
+    }}
+    """
+
+    query_results = rdf_graph.query(query)
+    query_results_education = rdf_graph.query(queryEducation)
+    query_results_experience = rdf_graph.query(queryExperience)
     
     user = {}
 
@@ -103,6 +116,30 @@ def get_user_by_id(id):
             "educations": [],
             "experiences": []
         }
+
+    for row in query_results_education:
+        education = {
+            "institution": str(row["institution"]),
+            "degree": str(row["degree"]),
+            "fieldOfStudy": str(row["fieldOfStudy"]),
+            "yearGraduated": str(row["yearGraduated"])
+        }
+        user["educations"].append(education)
+
+    for row in query_results_experience:
+        endDate = row["endDate"].toPython() if row["endDate"] != None else None
+        experience = {
+            "company" : {
+                "name": str(row["companyName"])
+            },
+            "jobTitle": str(row["jobTitle"]),
+            "startDate": row["startDate"].toPython(),
+            "endDate": endDate,
+            "description": str(row["description"])
+        }
+        user["experiences"].append(experience)
+
+    print(user)
 
     return user
 
