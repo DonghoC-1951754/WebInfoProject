@@ -22,6 +22,7 @@ const ToggleCards = () => {
           {usersData.users.map((user) => (
             <UserCard
               key={user.id}
+              id = {user.id}
               firstName={user.firstName}
               lastName={user.name}
               location={user.location}
@@ -42,6 +43,7 @@ const ToggleCards = () => {
           {companiesData.companies.map((company) => (
             <CompanyCard
               key={company.id}
+              id = {company.id}
               name={company.name}
               location={company.location}
               email={company.email}

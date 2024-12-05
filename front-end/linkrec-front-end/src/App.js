@@ -13,6 +13,8 @@ import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import UserCreationForm from "./components/UserCreationForm";
 import CompanyCreationForm from "./components/CompanyCreationForm";
+import UserProfile from "./components/UserProfile";
+import CompanyProfile from "./components/CompanyProfile";
 import Profiles from "./components/Profiles";
 import Vacancies from "./components/Vacancies";
 import EmptyPage from "./components/EmptyPage";
@@ -102,6 +104,24 @@ function App() {
               element={
                 <ApolloProvider client={userclient}>
                     <Profiles />
+                </ApolloProvider>
+              }
+            />
+            <Route
+              exact
+              path="/companyProfile"
+              element={
+                <ApolloProvider client={userclient}>
+                    <CompanyProfile />
+                </ApolloProvider>
+              }
+            />
+            <Route
+              exact
+              path="/userProfile/:id"
+              element={
+                <ApolloProvider client={userclient}>
+                    <UserProfile />
                 </ApolloProvider>
               }
             />
