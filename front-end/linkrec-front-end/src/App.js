@@ -59,6 +59,14 @@ function App() {
     }),
   });
 
+  const createcompanyclient = new ApolloClient({
+    uri: " http://127.0.0.1:5000/createcompany", // Replace with your GraphQL API endpoint
+    cache: new InMemoryCache({
+      addTypename: false, // Disable __typename
+    }),
+  });
+
+
   useEffect(() => {
     const userToken = localStorage.getItem("userToken");
     if (userToken) {
@@ -114,9 +122,9 @@ function App() {
               exact
               path="/createCompany"
               element={
-                <>
+                <ApolloProvider client={createcompanyclient}>
                   <CompanyCreationForm />
-                </>
+                </ ApolloProvider>
               }
             />
             <Route
