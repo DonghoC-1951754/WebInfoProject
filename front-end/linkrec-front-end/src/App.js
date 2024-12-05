@@ -31,42 +31,6 @@ function App() {
     }),
   });
 
-  const vacancyclient = new ApolloClient({
-    uri: " http://127.0.0.1:5000/getvacancies", // Replace with your GraphQL API endpoint
-    cache: new InMemoryCache({
-      addTypename: false, // Disable __typename
-    }),
-  });
-
-  const userbyidclient = new ApolloClient({
-    uri: " http://127.0.0.1:5000/getuserbyid", // Replace with your GraphQL API endpoint
-    cache: new InMemoryCache({
-      addTypename: false, // Disable __typename
-    }),
-  });
-
-  const companybyidclient = new ApolloClient({
-    uri: " http://127.0.0.1:5000/getcompanybyid", // Replace with your GraphQL API endpoint
-    cache: new InMemoryCache({
-      addTypename: false, // Disable __typename
-    }),
-  });
-
-  const createuserclient = new ApolloClient({
-    uri: " http://127.0.0.1:5000/createuser", // Replace with your GraphQL API endpoint
-    cache: new InMemoryCache({
-      addTypename: false, // Disable __typename
-    }),
-  });
-
-  const createcompanyclient = new ApolloClient({
-    uri: " http://127.0.0.1:5000/createcompany", // Replace with your GraphQL API endpoint
-    cache: new InMemoryCache({
-      addTypename: false, // Disable __typename
-    }),
-  });
-
-
   useEffect(() => {
     const userToken = localStorage.getItem("userToken");
     if (userToken) {
@@ -113,18 +77,18 @@ function App() {
               exact
               path="/createUser"
               element={
-                <ApolloProvider client={createuserclient}>
+                <>
                   <UserCreationForm />
-                </ ApolloProvider>
+                </>
               }
             />
             <Route
               exact
               path="/createCompany"
               element={
-                <ApolloProvider client={createcompanyclient}>
+                <>
                   <CompanyCreationForm />
-                </ ApolloProvider>
+                </>
               }
             />
             <Route
@@ -140,18 +104,18 @@ function App() {
               exact
               path="/companyProfile/:id"
               element={
-                <ApolloProvider client={companybyidclient}>
+                <>
                     <CompanyProfile />
-                </ApolloProvider>
+                </>
               }
             />
             <Route
               exact
               path="/userProfile/:id"
               element={
-                <ApolloProvider client={userbyidclient}>
+                <>
                     <UserProfile />
-                </ApolloProvider>
+                </>
               }
             />
             <Route
@@ -160,9 +124,9 @@ function App() {
               element={
                 <>
                   {isLoggedIn ? (
-                    <ApolloProvider client={vacancyclient}>
+                    <>
                       <Vacancies />
-                    </ApolloProvider>
+                    </>
                   ) : (
                     <EmptyPage/>
                   )}
