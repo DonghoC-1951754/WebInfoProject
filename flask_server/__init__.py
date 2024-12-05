@@ -333,14 +333,6 @@ def create_app(test_config=None):
     # Create executable schema including the Date scalar
     schema = make_executable_schema(gql_schema, query, mutation, date_scalar)
 
-    # GraphQL explorer route
-    # @app.route("/graphql", methods=["GET"])
-    # def graphql_explorer():
-    #     for user in users_test_data:
-    #         print(user)
-    #         print("\n")
-    #     return ExplorerGraphiQL().render()
-
     # GraphQL server route
     @app.route("/getusers", methods=["POST"])
     # @jwt_required
@@ -384,19 +376,6 @@ def create_app(test_config=None):
         json = jsonify(rows)
         return json, 200
 
-        # Handle the request
-        # success, result = graphql_sync(
-        #     schema,
-        #     data,
-        #     context_value={"request": request},
-        #     debug=app.debug
-        # )
-        # print("result2: ", result)
-        # status_code = 200 if success else 400
-        # # for user in users_test_data:
-        # #     print(user)
-        # #     print("\n")
-        # return jsonify(result), status_code
 
     @app.route("/getvacancies", methods=["POST"])
     def getvacancies():
@@ -415,112 +394,12 @@ def create_app(test_config=None):
         #     print("\n")
         return jsonify(result), status_code
 
-        query = data['query']
-
-        filter_query_vacancies_current_date(query)
-
-        # sparqlquery = graphql_to_sparql(query)
-
-        # headers = []  # Column headers for the table
-        # rows = []  # Data rows for the table
-
-        # try:
-        #     # Execute the SPARQL query
-        #     query_results = rdf_graph.query(sparqlquery)
-
-        #     # Extract variable names for headers
-        #     headers = [str(var) for var in query_results.vars]
-
-        #     # Iterate over the query results and store them
-        #     rows = [
-        #         {headers[i]: str(row[i]) for i in range(len(headers))}
-        #         for row in query_results
-        #     ]
-
-        # except Exception as e:
-        #     return jsonify({"error": str(e)}), 400
-
-        # rows = convert_response(rows)
-
-        # # Return the results as JSON
-        # json = jsonify(rows)
-        # return json, 200
-
     # a simple page that says hello
     @app.route('/hello')
     @jwt_required
     def hello():
         return 'Hello, World!'
 
-    @app.route('/sparql')
-    def sparql_query():
-        query = """
-        SELECT ?subject ?predicate ?object
-        WHERE {
-            ?subject ?predicate ?object .
-        }
-        """
-        query = """
-        PREFIX ex: <http://example.com/schema#>
-        PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 
-        SELECT ?user ?firstName ?name ?email ?country ?city ?institution ?degree
-        WHERE {
-        ?user a ex:User ;
-                ex:firstName ?firstName ;
-                ex:name ?name ;
-                ex:email ?email ;
-                ex:location ?location ;
-                ex:educations ?education .
-
-        ?location ex:country ?country ;
-                    ex:city ?city .
-
-        ?education ex:institution ?institution ;
-                    ex:degree ?degree .
-        }
-        """
-        headers = []  # Column headers for the table
-        rows = []  # Data rows for the table
-
-        try:
-            # Execute the SPARQL query
-            query_results = rdf_graph.query(query)
-
-            # Extract variable names for headers
-            headers = [str(var) for var in query_results.vars]
-
-            # Iterate over the query results and store them
-            rows = [
-                {headers[i]: str(row[i]) for i in range(len(headers))}
-                for row in query_results
-            ]
-
-        except Exception as e:
-            return jsonify({"error": str(e)})
-
-        # Return the results as JSON
-        json = jsonify({"headers": headers, "rows": rows})
-        #print(json)
-        return json
-
-    @app.route('/converttosparql')
-    def convert_to_sparql():
-        query = """
-        query {
-          users {
-            id
-            firstName
-            name
-            location {
-              country
-              city
-            }
-          }
-        }
-        """
-        sparql_query = graphql_to_sparql(query)
-        return jsonify({"sparql_query": sparql_query})
-    return app
 
     return app
