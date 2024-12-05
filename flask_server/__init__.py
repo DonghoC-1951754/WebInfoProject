@@ -233,6 +233,101 @@ def get_user_by_id(id):
     return user
 
 
+def get_companiy_by_id(id):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?name ?email ?country ?city ?cityCode ?street ?houseNumber
+    WHERE {{
+      ?company a ex:Company ;
+            ex:id "{id}" ;
+            ex:name ?name ;
+            ex:email ?email ;
+            ex:location ?location .
+
+      ?location ex:country ?country ;
+                ex:city ?city ;
+                ex:cityCode ?cityCode ;
+                ex:street ?street ;
+                ex:houseNumber ?houseNumber .
+    }}
+    """
+
+    query_results = rdf_graph.query(query)
+    
+    company = {}
+
+    for row in query_results:
+        company = {
+            "id": id,
+            "name": str(row["name"]),
+            "email": str(row["email"]),
+            "location": {
+                "country": str(row["country"]),
+                "city": str(row["city"]),
+                "cityCode": str(row["cityCode"]),
+                "street": str(row["street"]),
+                "houseNumber": str(row["houseNumber"])
+            },
+            "vacancies": []
+        }
+
+    vacancies_query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?id ?vacancy ?jobTitle ?requiredSkills ?startDate ?endDate
+    WHERE {{
+        ?company a ex:Company ;
+                ex:id "{id}" ;
+                ex:vacancies ?vacancy .
+        ?vacancy ex:id ?id ;
+                 ex:jobTitle ?jobTitle ;
+                 ex:requiredSkills ?requiredSkills ;
+                 ex:startDate ?startDate ;
+                 ex:endDate ?endDate .
+    }}
+    """
+
+    vacancies_query_results = rdf_graph.query(vacancies_query)
+
+    vacancies = []
+
+    for row in vacancies_query_results:
+        vacancy = {
+            "id": str(row["id"]),
+            "jobTitle": str(row["jobTitle"]),
+            "startDate": row["startDate"].toPython(),
+            "requiredSkills": str(row["requiredSkills"]),
+            "endDate": row["endDate"].toPython()
+        }
+        vacancies.append(vacancy)
+
+    vacancy_skills = {}
+    current_id = None
+    for vacancy in vacancies:
+        if current_id == vacancy['id']:
+            vacancy_skills[current_id].append(vacancy['requiredSkills'])
+        else:
+            current_id = vacancy['id']
+            vacancy_skills[current_id] = [vacancy['requiredSkills']]
+
+    # remove duplicates
+    current_id = None
+    i = 0
+    while i < len(vacancies):
+        if current_id == vacancies[i]['id']:
+            vacancies.pop(i)
+        else:
+            current_id = vacancies[i]['id']
+            i += 1
+
+    for vacancy in vacancies:
+        vacancy['requiredSkills'] = vacancy_skills[vacancy['id']]
+
+    company["vacancies"] = vacancies
+
+    return company
+
 
 def get_all_vacancies():
     query = """
@@ -438,6 +533,10 @@ def create_app(test_config=None):
     def resolve_companies(_, info):
         return companies_test_data
 
+    @query.field("company")
+    def resolve_companies(_, info, id):
+        return get_companiy_by_id(id)
+
     # Resolver for `user` query
     @query.field("user")
     def resolve_user(_, info, id):
@@ -574,7 +673,6 @@ def create_app(test_config=None):
             ]
 
         except Exception as e:
-            print(e)
             return jsonify({"error": str(e)}), 400
 
 
@@ -608,6 +706,22 @@ def create_app(test_config=None):
         #     print("\n")
         return jsonify(result), status_code
 
+    @app.route("/getcompanybyid", methods=["POST"])
+    def getcompanybyid():
+        data = request.get_json()
+
+        #Handle the request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value={"request": request},
+            debug=app.debug
+        )
+        status_code = 200 if success else 400
+        # for user in users_test_data:
+        #     print(user)
+        #     print("\n")
+        return jsonify(result), status_code
 
     @app.route('/login')
     def login():
@@ -674,6 +788,8 @@ def create_app(test_config=None):
         #     print(user)
         #     print("\n")
         return jsonify(result), status_code
+
+    
 
     # a simple page that says hello
     @app.route('/hello')
