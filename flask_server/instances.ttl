@@ -45,6 +45,18 @@ ex:User2 a ex:User ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .
 
+ex:User3 a ex:User ;
+    ex:id "auth0|6750740042a151293be37fba" ;
+    ex:firstName "Dongho" ;
+    ex:name "Chun" ;
+    ex:email "dongho.alternative@gmail.com" ;
+    ex:password "test" ;
+    ex:dateOfBirth "1990-02-20"^^xsd:date ;
+    ex:gender "Male" ;
+    ex:location ex:Location2 ;
+    ex:educations ex:Education3 ;
+    ex:experiences ex:Experience2, ex:Experience3 .
+
 ### Example Educations
 ex:Education1 a ex:Education ;
     ex:institution "Harvard University" ;

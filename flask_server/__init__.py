@@ -377,6 +377,21 @@ def create_app(test_config=None):
         return json, 200
 
 
+    @app.route('/login')
+    def login():
+        # Redirect to Auth0's login page
+        redirect_uri = url_for('callback', _external=True)
+        return oauth.auth_client.authorize_redirect(redirect_uri)
+    
+    @app.route('/callback')
+    def callback():
+        token = oauth.auth_client.authorize_access_token()
+        userinfo = token['userinfo']
+        sub = userinfo['sub']
+        access_token = token['access_token']
+        # user = oauth.auth_client.parse_id_token(token)
+        return jsonify(access_token)
+
     @app.route("/getvacancies", methods=["POST"])
     def getvacancies():
         data = request.get_json()
