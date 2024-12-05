@@ -111,7 +111,7 @@ function App() {
               element={
                 <>
                   {isLoggedIn ? (
-                    <ApolloProvider client={userclient}>
+                    <ApolloProvider client={vacancyclient}>
                       <Vacancies />
                     </ApolloProvider>
                   ) : (

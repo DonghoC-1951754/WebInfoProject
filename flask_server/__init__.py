@@ -6,7 +6,7 @@ from ariadne.explorer import ExplorerGraphiQL
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from rdflib import Graph, Namespace, RDF, Literal
-from flask_server.convert_graphql import graphql_to_sparql, convert_response
+from flask_server.convert_graphql import graphql_to_sparql, convert_response, filter_query_vacancies_current_date
 
 
 # load in the RDF graph
@@ -25,6 +25,80 @@ EX = Namespace("http://example.org/")
 
 # Define a custom Date scalar
 date_scalar = ScalarType("Date")
+
+def get_all_vacancies():
+    query = """
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    SELECT ?vacancy ?jobTitle ?companyName ?country ?city ?cityCode ?requiredskills ?startDate ?endDate
+    WHERE {
+        ?vacancy a ex:Vacancy ;
+                 ex:jobTitle ?jobTitle ;
+                 ex:company ?company ;
+                 ex:requiredSkills ?requiredskills ;
+                 ex:startDate ?startDate ;
+                 ex:endDate ?endDate .
+
+        ?company ex:name ?companyName ;
+                 ex:location ?location .
+
+        ?location ex:country ?country ;
+                  ex:city ?city ;
+                  ex:cityCode ?cityCode .
+    }
+    """
+    query_results = rdf_graph.query(query)
+
+
+    vacancies = []
+    for row in query_results:
+        print("row: ", row['requiredskills']) 
+        vacancy = {
+            "id": str(row["vacancy"]),
+            "jobTitle": str(row["jobTitle"]),
+            "company": {
+                "name": str(row["companyName"]),
+                "location": {
+                    "country": str(row["country"]),
+                    "city": str(row["city"]),
+                    "cityCode": int(row["cityCode"])
+                }
+            },
+            "requiredSkills": row['requiredskills'],
+            "startDate": row["startDate"].toPython(),
+            "endDate": row["endDate"].toPython()
+        }
+        vacancies.append(vacancy)
+
+    # group skills by vacancy
+    current_id = None
+    skills = {}
+    for vacancy in vacancies:
+        if current_id == vacancy['id']:
+            skills[current_id].append(vacancy['requiredSkills'])
+        else:
+            current_id = vacancy['id']
+            skills[current_id] = [vacancy['requiredSkills']]
+
+    # remove duplicates
+    current_id = None
+    i = 0
+    while i < len(vacancies):
+        if current_id == vacancies[i]['id']:
+            vacancies.pop(i)
+        else:
+            current_id = vacancies[i]['id']
+            i += 1
+
+    # add skills to vacancies
+    for vacancy in vacancies:
+        vacancy['requiredSkills'] = skills[vacancy['id']]
+
+    return vacancies
+
 
 # Serialize the Date to a string (ISO format)
 @date_scalar.serializer
@@ -104,7 +178,8 @@ def create_app(test_config=None):
         return next((user for user in users_test_data if user["email"] == email), None)
 
     @query.field("activeVacancies")
-    def resolve_active_vacancies(_, info, currentDate):
+    def resolve_active_vacancies(first, info, currentDate):
+        return get_all_vacancies()
         return [vacancy for vacancy in vacancies_test_data if vacancy["startDate"] <= currentDate <= vacancy["endDate"]]
 
     # Helper function to hash passwords
@@ -230,33 +305,49 @@ def create_app(test_config=None):
     def getvacancies():
         data = request.get_json()
 
+        #Handle the request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value={"request": request},
+            debug=app.debug
+        )
+        status_code = 200 if success else 400
+        # for user in users_test_data:
+        #     print(user)
+        #     print("\n")
+        return jsonify(result), status_code
+
         query = data['query']
-        sparqlquery = graphql_to_sparql(query)
 
-        headers = []  # Column headers for the table
-        rows = []  # Data rows for the table
+        filter_query_vacancies_current_date(query)
 
-        try:
-            # Execute the SPARQL query
-            query_results = rdf_graph.query(sparqlquery)
+        # sparqlquery = graphql_to_sparql(query)
 
-            # Extract variable names for headers
-            headers = [str(var) for var in query_results.vars]
+        # headers = []  # Column headers for the table
+        # rows = []  # Data rows for the table
 
-            # Iterate over the query results and store them
-            rows = [
-                {headers[i]: str(row[i]) for i in range(len(headers))}
-                for row in query_results
-            ]
+        # try:
+        #     # Execute the SPARQL query
+        #     query_results = rdf_graph.query(sparqlquery)
 
-        except Exception as e:
-            return jsonify({"error": str(e)}), 400
+        #     # Extract variable names for headers
+        #     headers = [str(var) for var in query_results.vars]
 
-        rows = convert_response(rows)
+        #     # Iterate over the query results and store them
+        #     rows = [
+        #         {headers[i]: str(row[i]) for i in range(len(headers))}
+        #         for row in query_results
+        #     ]
 
-        # Return the results as JSON
-        json = jsonify(rows)
-        return json, 200
+        # except Exception as e:
+        #     return jsonify({"error": str(e)}), 400
+
+        # rows = convert_response(rows)
+
+        # # Return the results as JSON
+        # json = jsonify(rows)
+        # return json, 200
 
     # a simple page that says hello
     @app.route('/hello')
@@ -334,3 +425,5 @@ def create_app(test_config=None):
         """
         sparql_query = graphql_to_sparql(query)
         return jsonify({"sparql_query": sparql_query})
+
+    return app

@@ -199,3 +199,47 @@ ex:description a owl:DatatypeProperty ;
     rdfs:range xsd:string ;
     rdfs:label "description" ;
     rdfs:comment "Description of the experience." .
+
+# Vacancy properties
+
+# ID
+ex:id a owl:DatatypeProperty ;
+    rdfs:domain ex:Vacancy ;
+    rdfs:range xsd:string ;
+    rdfs:label "id" ;
+    rdfs:comment "Unique identifier for the vacancy." .
+
+# Job Title
+ex:jobTitle a owl:DatatypeProperty ;
+    rdfs:domain ex:Vacancy ;
+    rdfs:range xsd:string ;
+    rdfs:label "jobTitle" ;
+    rdfs:comment "The title of the job position." .
+
+# Company
+ex:company a owl:ObjectProperty ;
+    rdfs:domain ex:Vacancy ;
+    rdfs:range ex:Company ;
+    rdfs:label "company" ;
+    rdfs:comment "The company offering the vacancy." .
+
+# Required Skills
+ex:requiredSkills a owl:DatatypeProperty ;
+    rdfs:domain ex:Vacancy ;
+    rdfs:range xsd:string ;
+    rdfs:label "requiredSkills" ;
+    rdfs:comment "Skills required for the job." .
+
+# Start Date
+ex:startDate a owl:DatatypeProperty ;
+    rdfs:domain ex:Vacancy ;
+    rdfs:range xsd:date ;
+    rdfs:label "startDate" ;
+    rdfs:comment "The start date of the vacancy." .
+
+# End Date
+ex:endDate a owl:DatatypeProperty ;
+    rdfs:domain ex:Vacancy ;
+    rdfs:range xsd:date ;
+    rdfs:label "endDate" ;
+    rdfs:comment "The end date of the vacancy." .
