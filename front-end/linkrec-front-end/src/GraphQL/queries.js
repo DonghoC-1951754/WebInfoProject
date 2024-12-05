@@ -21,7 +21,7 @@ export const GET_USERS = gql`
 
 export const GET_COMPANIES = gql`
   query {
-    users {
+    companies {
       id
       name
       email
@@ -71,6 +71,60 @@ export const GET_ACTIVE_VACANCIES = gql`
       requiredSkills
       startDate
       endDate
+    }
+  }
+`;
+
+export const GET_PROFILE = gql`
+  query GetProfile($id: ID!) {
+    getProfile(id: $id) {
+      ... on User {
+        id
+        firstName
+        name
+        email
+        location {
+          country
+          city
+          cityCode
+          street
+          houseNumber
+        }
+        gender
+        dateOfBirth
+        educations {
+          institution
+          degree
+          fieldOfStudy
+          yearGraduated
+        }
+        experiences {
+          companyName
+          jobTitle
+          startDate
+          endDate
+          description
+        }
+      }
+      ... on Company {
+        id
+        name
+        email
+        location {
+          country
+          city
+          cityCode
+          street
+          houseNumber
+        }
+        vacancies {
+          id
+          jobTitle
+          requiredSkills
+          startDate
+          endDate
+        }
+      }
     }
   }
 `;

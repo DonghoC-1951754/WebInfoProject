@@ -80,10 +80,12 @@ input ExperienceInput {
     description: String
 }
 
+union Profile = User | Company
 
 #Queries
 type Query {
     users: [User]
+    companies: [Company]
     user(id: ID!): User
     userByEmail(email: String!): User
     companyByEmail(email: String!): Company
@@ -91,6 +93,7 @@ type Query {
     vacancy(id: ID!): Vacancy
     activeVacancies(currentDate: Date!): [Vacancy]
     searchUsersByIndustry(industry: String!): [User]
+    profile($id: ID!): Profile
 }
 
 # Mutation Type: Modify data in the system
