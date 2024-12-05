@@ -231,11 +231,18 @@ def create_app(test_config=None):
     @query.field("users")
     def resolve_users(_, info):
         return users_test_data
+    
+    # Resolver for `companies` query
+    @query.field("companies")
+    def resolve_companies(_, info):
+        print("hier")
+        return companies_test_data
 
     # Resolver for `user` query
     @query.field("user")
     def resolve_user(_, info, id):
         return next((user for user in users_test_data if user["id"] == id), None)
+    
     
     # Resolver for `userByEmail` query
     @query.field("userByEmail")
