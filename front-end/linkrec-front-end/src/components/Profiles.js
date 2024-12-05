@@ -9,12 +9,17 @@ const ToggleCards = () => {
     const [showUsers, setShowUsers] = useState(true);
   
     
-  
-    
+    console.log(localStorage.getItem('accessToken'))
   
     const RenderUsers = () => {
       // Fetch Users
-      const { loading: usersLoading, error: usersError, data: usersData } = useQuery(GET_USERS);
+      const { loading: usersLoading, error: usersError, data: usersData } = useQuery(GET_USERS , {
+        context: {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      });
       if (usersLoading) return <p>Loading Users...</p>;
       if (usersError) return <p>Error Loading Users: {usersError.message}</p>;
       return (

@@ -64,11 +64,6 @@ def create_app(test_config=None):
 
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
-    # app.config.from_mapping(
-    #     SECRET_KEY='dev',
-    #     DATABASE=os.path.join(app.instance_path, 'flaskr.sqlite'),
-    # )
     app.secret_key = env.get("APP_SECRET_KEY")
     oauth = OAuth(app)
     oauth.register(
@@ -77,6 +72,7 @@ def create_app(test_config=None):
         client_secret=env.get("AUTH0_CLIENT_SECRET"),
         client_kwargs={
             "scope": "openid profile email",
+            "audience": "https://auth0-graphql-api"
         },
         server_metadata_url=f'https://{env.get("AUTH0_DOMAIN")}/.well-known/openid-configuration'
     )
@@ -119,8 +115,6 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
-
-    
 
     CORS(app)
 
@@ -279,7 +273,6 @@ def create_app(test_config=None):
     # Create executable schema including the Date scalar
     schema = make_executable_schema(gql_schema, query, mutation, date_scalar)
 
-    # GraphQL server route
     @app.route("/getusers", methods=["POST"])
     # @jwt_required
     def graphql_server():
@@ -333,9 +326,6 @@ def create_app(test_config=None):
             debug=app.debug
         )
         status_code = 200 if success else 400
-        # for user in users_test_data:
-        #     print(user)
-        #     print("\n")
         return jsonify(result), status_code
 
     @app.route('/login')
@@ -346,19 +336,19 @@ def create_app(test_config=None):
     
     @app.route('/callback')
     def callback():
-        token = oauth.auth_client.authorize_access_token()
+        token = oauth.auth_client.authorize_access_token(audience="https://auth0-graphql-api")
+        # token = jsonify(token)
         userinfo = token['userinfo']
         sub = userinfo['sub']
         access_token = token['access_token']
         # user = oauth.auth_client.parse_id_token(token)
-        return jsonify(access_token)
-
+        print(token)
+        print(access_token)
+        return redirect(f'http://localhost:3000/registration?token={access_token}')  
 
     # a simple page that says hello
     @app.route('/hello')
-    # @jwt_required
     def hello():
-        # get all users
         return 'Hello, World!'
 
 
