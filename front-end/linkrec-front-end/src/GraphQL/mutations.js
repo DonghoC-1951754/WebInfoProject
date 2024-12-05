@@ -37,13 +37,13 @@ export const CREATE_USER = gql`
 `;
 
 export const CREATE_COMPANY = gql`
-  mutation CreateUser(
+  mutation createCompany(
     $name: String!,
     $email: String!,
     $password: String!,
     $location: LocationInput!
   ) {
-    createUser(
+    createCompany(
       name: $name,
       email: $email,
       password: $password,
