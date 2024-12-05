@@ -306,12 +306,19 @@ def create_app(test_config=None):
     @query.field("users")
     def resolve_users(_, info):
         return users_test_data
+    
+    # Resolver for `companies` query
+    @query.field("companies")
+    def resolve_companies(_, info):
+        print("hier")
+        return companies_test_data
 
     # Resolver for `user` query
     @query.field("user")
     def resolve_user(_, info, id):
         return get_user_by_id(id)
         return next((user for user in users_test_data if user["id"] == id), None)
+    
     
     # Resolver for `userByEmail` query
     @query.field("userByEmail")
@@ -469,6 +476,21 @@ def create_app(test_config=None):
         #     print("\n")
         return jsonify(result), status_code
 
+
+    @app.route('/login')
+    def login():
+        # Redirect to Auth0's login page
+        redirect_uri = url_for('callback', _external=True)
+        return oauth.auth_client.authorize_redirect(redirect_uri)
+    
+    @app.route('/callback')
+    def callback():
+        token = oauth.auth_client.authorize_access_token()
+        userinfo = token['userinfo']
+        sub = userinfo['sub']
+        access_token = token['access_token']
+        # user = oauth.auth_client.parse_id_token(token)
+        return jsonify(access_token)
 
     @app.route("/getvacancies", methods=["POST"])
     def getvacancies():
