@@ -9,7 +9,7 @@ const ToggleCards = () => {
     const [showUsers, setShowUsers] = useState(true);
   
     
-    console.log(localStorage.getItem('accessToken'))
+    // console.log(localStorage.getItem('accessToken'))
   
     const RenderUsers = () => {
       // Fetch Users
@@ -40,7 +40,13 @@ const ToggleCards = () => {
   
     const RenderCompanies = () => {
       // Fetch Companies
-      const { loading: companiesLoading, error: companiesError, data: companiesData } = useQuery(GET_COMPANIES);
+      const { loading: companiesLoading, error: companiesError, data: companiesData } = useQuery(GET_COMPANIES, {
+        context: {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      });
       if (companiesLoading) return <p>Loading Companies...</p>;
       if (companiesError) return <p>Error Loading Companies: {companiesError.message}</p>;
       return (

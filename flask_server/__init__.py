@@ -17,6 +17,7 @@ from jwt import PyJWKClient
 import random
 import string
 from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies
+from functools import wraps
 
 oauth = OAuth()
 # load in the RDF graph
@@ -79,6 +80,7 @@ def create_app(test_config=None):
 
     
     def jwt_required(func):
+        @wraps(func)
         def wrapper(*args, **kwargs):
             # Get token from Authorization header
             auth_header = request.headers.get("Authorization", None)
@@ -86,18 +88,25 @@ def create_app(test_config=None):
                 return jsonify({"message": "Authorization header is missing"}), 401
             try:
                 token = auth_header.split(" ")[1]
-                # Public Key: https://webinfoproject.eu.auth0.com/.well-known/jwks.json
                 jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
-                signing_key = jwks_client.get_signing_key_from_jwt(token)
-                claims = jwt.decode(
-                    token,
-                    signing_key.key,
-                    algorithms=["RS256"],
-                    issuer="https://webinfoproject.eu.auth0.com/",
-                    audience="https://auth0-graphql-api"
-                )
-                # Store the decoded token's data in the request context
-                request.user = claims
+                signing_key = jwks_client.get_signing_key_from_jwt(token).key
+                decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
+                
+            except jwt.ExpiredSignatureError:
+                print("The token has expired.")
+                return jsonify({"message": f"Authentication failed!"}), 401
+            except jwt.InvalidAudienceError:
+                print("Invalid audience claim.")
+                return jsonify({"message": f"Authentication failed!"}), 401
+            except jwt.InvalidIssuerError:
+                print("Invalid issuer claim.")
+                return jsonify({"message": f"Authentication failed!"}), 401
+            except jwt.DecodeError:
+                print("Error decoding the JWT.")
+                return jsonify({"message": f"Authentication failed!"}), 401
+            except jwt.PyJWTError as e:
+                print(f"JWT Error: {e}")
+                return jsonify({"message": f"Authentication failed!"}), 401
             except Exception as e:
                 return jsonify({"message": f"Authentication failed!"}), 401
 
@@ -341,10 +350,12 @@ def create_app(test_config=None):
         userinfo = token['userinfo']
         sub = userinfo['sub']
         access_token = token['access_token']
+        # id_token = jwt
+        id_token = token['id_token']
         # user = oauth.auth_client.parse_id_token(token)
         print(token)
         print(access_token)
-        return redirect(f'http://localhost:3000/registration?token={access_token}')  
+        return redirect(f'http://localhost:3000/registration?token={id_token}')  
 
     # a simple page that says hello
     @app.route('/hello')
