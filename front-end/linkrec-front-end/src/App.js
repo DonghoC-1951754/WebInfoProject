@@ -138,7 +138,7 @@ function App() {
             />
             <Route
               exact
-              path="/companyProfile"
+              path="/companyProfile/:id"
               element={
                 <ApolloProvider client={companybyidclient}>
                     <CompanyProfile />
