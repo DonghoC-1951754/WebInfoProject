@@ -7,13 +7,14 @@ FIELD_MAPPING = {
     "email": "ex:email",
     "firstName": "ex:firstName",
     "name": "ex:name",
-    "location": {"property": "ex:location", "class": "ex:Location"},
+    "location": {"property": "ex:location", "class": "ex:Location", "id": "?location"},
     "country": "ex:country",
     "city": "ex:city",
     "cityCode": "ex:cityCode",
     "street": "ex:street", 
     "houseNumber": "ex:houseNumber",
     "vacancies": {"class": "ex:Vacancy", "id": "?vacancy"},
+    "companies": {"class": "ex:Company", "id": "?company"},
 
 }
 
@@ -28,6 +29,7 @@ def graphql_to_sparql(graphql_query):
     
     def process_selection_set(selection_set, parent_var):
         """Recursively process GraphQL selection sets."""
+        where_clauses.append(f"{FIELD_MAPPING[parent_var]['id']} a {FIELD_MAPPING[parent_var]['class']} .")
         for field in selection_set.selections:
             field_name = field.name.value
             if field_name not in FIELD_MAPPING:
@@ -37,19 +39,18 @@ def graphql_to_sparql(graphql_query):
             
             if isinstance(field_mapping, dict) and "class" in field_mapping:
                 # Handle nested object relationships
-                nested_var = f"?{field_name}"
-                where_clauses.append(f"{parent_var} {field_mapping['property']} {nested_var} .")
-                process_selection_set(field.selection_set, nested_var)
+                where_clauses.append(f"{FIELD_MAPPING[parent_var]['id']} {field_mapping['property']} ?{field_name} .")
+                process_selection_set(field.selection_set, field_name)
             else:
                 # Handle simple fields
                 sparql_var = f"?{field_name}"
                 select_clauses.append(sparql_var)
-                where_clauses.append(f"{parent_var} {field_mapping} {sparql_var} .")
+                where_clauses.append(f"{FIELD_MAPPING[parent_var]['id']} {field_mapping} {sparql_var} .")
     
     # Start processing the root query
     root_field = query_ast.definitions[0].selection_set.selections[0]
-    root_var = FIELD_MAPPING[root_field.name.value]["id"]
-    select_clauses.append(root_var)
+    root_var = root_field.name.value
+    select_clauses.append(FIELD_MAPPING[root_var]["id"])
     process_selection_set(root_field.selection_set, root_var)
     
     # Combine SPARQL components
@@ -62,32 +63,9 @@ def graphql_to_sparql(graphql_query):
     )
     return sparql_query
 
-def filter_query_vacancies_current_date(sparql_query):
-    # cut off function names from graphql query (query GetActiveVacancies($currentDate: Date!) {vactiveVacancies(currentDate: $currentDate) { --> query {)
-    sparql_query = sparql_query.replace("GetActiveVacancies($currentDate: Date!) {", "")
-    sparql_query = sparql_query.replace("activeVacancies(currentDate: $currentDate)", "vacancies")
-
-    # delete last } from query
-    sparql_query = sparql_query[:-1]
-
-    print("converted query", sparql_query)
 
 
-    sparql_query = graphql_to_sparql(sparql_query)
-
-    
-    print("sparql_query", sparql_query)
-     
-
-    # sparql_query = sparql_query.replace(
-    #     "WHERE {",
-    #     "WHERE {\n  FILTER (xsd:dateTime(?startDate) < xsd:dateTime(NOW()))"
-    # )
-    # return sparql_query
-
-
-
-def convert_response(sparqlrows):
+def convert_response_users(sparqlrows):
 
     outer = { 'data': { 'users': [] } }
 
@@ -97,6 +75,16 @@ def convert_response(sparqlrows):
 
     return outer
 
+
+def convert_response_companies(sparqlrows):
+    
+    outer = { 'data': { 'companies': [] } }
+
+    for company in sparqlrows:
+        inner = { 'id': company['id'], 'name': company['name'], 'email': company['email'], 'location': { 'country': company['country'], 'city': company['city'], 'cityCode':company['cityCode'], 'street':company['street'], 'houseNumber':company['houseNumber']} }
+        outer['data']['companies'].append(inner)
+
+    return outer
 
 # Example GraphQL query
 graphql_query = """
@@ -112,7 +100,3 @@ query {
   }
 }
 """
-
-# Convert and print SPARQL query
-sparql_query = graphql_to_sparql(graphql_query)
-#print(sparql_query)

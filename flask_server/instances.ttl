@@ -68,12 +68,14 @@ ex:Education3 a ex:Education ;
 ex:Company1 a ex:Company ;
     ex:id "C001" ;
     ex:name "TechCorp" ;
+    ex:email "joden@outlook.be" ;
     ex:location ex:Location1 ;
     ex:vacancies ex:Vacancy1, ex:Vacancy2 .
 
 ex:Company2 a ex:Company ;
     ex:id "C002" ;
     ex:name "Innovatech" ;
+    ex:email "yahoo@seppekimps.be" ;
     ex:location ex:Location2 ;
     ex:vacancies ex:Vacancy3 .
 

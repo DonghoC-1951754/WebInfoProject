@@ -6,12 +6,11 @@ from ariadne.explorer import ExplorerGraphiQL
 from flask import Flask, request, jsonify, url_for, redirect, session
 from flask_cors import CORS
 from rdflib import Graph, Namespace, RDF, Literal
-from flask_server.convert_graphql import graphql_to_sparql, convert_response, filter_query_vacancies_current_date
+from flask_server.convert_graphql import graphql_to_sparql, convert_response_users, convert_response_companies
 from flask_jwt_extended import JWTManager, verify_jwt_in_request
 from os import environ as env
 from authlib.integrations.flask_client import OAuth
 from dotenv import find_dotenv, load_dotenv
-from flask_server.convert_graphql import graphql_to_sparql, convert_response
 import jwt
 from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
@@ -63,7 +62,6 @@ def get_all_vacancies():
 
     vacancies = []
     for row in query_results:
-        print("row: ", row['requiredskills']) 
         vacancy = {
             "id": str(row["vacancy"]),
             "jobTitle": str(row["jobTitle"]),
@@ -232,7 +230,6 @@ def create_app(test_config=None):
     # Resolver for `users` query
     @query.field("users")
     def resolve_users(_, info):
-        print("hier")
         return users_test_data
 
     # Resolver for `user` query
@@ -248,7 +245,7 @@ def create_app(test_config=None):
     @query.field("activeVacancies")
     def resolve_active_vacancies(first, info, currentDate):
         return get_all_vacancies()
-        return [vacancy for vacancy in vacancies_test_data if vacancy["startDate"] <= currentDate <= vacancy["endDate"]]
+        #return [vacancy for vacancy in vacancies_test_data if vacancy["startDate"] <= currentDate <= vacancy["endDate"]]
 
     # Helper function to hash passwords
     def hash_password(password: str) -> str:
@@ -370,9 +367,18 @@ def create_app(test_config=None):
             ]
 
         except Exception as e:
+            print(e)
             return jsonify({"error": str(e)}), 400
 
-        rows = convert_response(rows)
+
+        # check if the query is for users or companies and convert the response accordingly
+        if "users" in query:
+            rows = convert_response_users(rows)
+        elif "companies" in query:
+            rows = convert_response_companies(rows)
+        else:
+            # throw an error if the query is not for users or companies
+            return jsonify({"error": "Invalid query"}), 400
 
         # Return the results as JSON
         json = jsonify(rows)
@@ -442,6 +448,7 @@ def create_app(test_config=None):
 
     # a simple page that says hello
     @app.route('/hello')
+    @jwt_required
     def hello():
         return 'Hello, World!'
 

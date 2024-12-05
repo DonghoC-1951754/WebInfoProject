@@ -8,13 +8,13 @@ import { GET_USERS, GET_COMPANIES } from '../GraphQL/queries';
 const ToggleCards = () => {
     const [showUsers, setShowUsers] = useState(true);
   
-    // Fetch Users
-    const { loading: usersLoading, error: usersError, data: usersData } = useQuery(GET_USERS);
+    
   
-    // Fetch Companies
-    const { loading: companiesLoading, error: companiesError, data: companiesData } = useQuery(GET_COMPANIES);
+    
   
-    const renderUsers = () => {
+    const RenderUsers = () => {
+      // Fetch Users
+      const { loading: usersLoading, error: usersError, data: usersData } = useQuery(GET_USERS);
       if (usersLoading) return <p>Loading Users...</p>;
       if (usersError) return <p>Error Loading Users: {usersError.message}</p>;
       return (
@@ -32,7 +32,9 @@ const ToggleCards = () => {
       );
     };
   
-    const renderCompanies = () => {
+    const RenderCompanies = () => {
+      // Fetch Companies
+      const { loading: companiesLoading, error: companiesError, data: companiesData } = useQuery(GET_COMPANIES);
       if (companiesLoading) return <p>Loading Companies...</p>;
       if (companiesError) return <p>Error Loading Companies: {companiesError.message}</p>;
       return (
@@ -65,7 +67,7 @@ const ToggleCards = () => {
             Companies
           </button>
         </div>
-        {showUsers ? renderUsers() : renderCompanies()}
+        {showUsers ? RenderUsers() : RenderCompanies()}
       </div>
     );
   };
