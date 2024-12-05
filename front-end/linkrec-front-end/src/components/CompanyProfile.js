@@ -27,6 +27,11 @@ const CompanyProfile = () => {
             {company.vacancies.map((vacancy, index) => (
                 <div key={index}>
                     <p>{vacancy.jobTitle}, startDate: {vacancy.startDate} , endDate: {vacancy.endDate}</p>
+                    {vacancy.skills.map((skill, skillIndex) => (
+                        <div key={skillIndex}>
+                            <p>skill:{skill}</p>
+                        </div>
+                    ))}
                 </div>
             ))}
         </div>
