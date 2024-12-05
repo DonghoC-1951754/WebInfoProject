@@ -35,6 +35,8 @@ EX = Namespace("http://example.org/")
 # Define a custom Date scalar
 date_scalar = ScalarType("Date")
 
+
+
 def check_email(email):
     query = f"""
     PREFIX ex: <http://example.com/schema#>
@@ -43,6 +45,24 @@ def check_email(email):
     WHERE {{
 
       ?user a ex:User ;
+            ex:email ?email .
+
+      FILTER (?email = "{email}")
+    }}
+    """
+
+    query_results = rdf_graph.query(query)
+
+    if len(query_results) > 0:
+        return False
+    
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?email
+    WHERE {{
+
+      ?company a ex:Company ;
             ex:email ?email .
 
       FILTER (?email = "{email}")
@@ -80,6 +100,31 @@ def add_new_user(user):
     rdf_graph.update(query)
 
     return user
+
+def add_new_company(company):
+    # Create a new company node
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT DATA {{
+        ex:{company["id"]} a ex:Company ;
+            ex:id "{company["id"]}" ;
+            ex:name "{company["name"]}" ;
+            ex:email "{company["email"]}" ;
+            ex:password "{company["password"]}" ;
+            ex:location [ a ex:Location ;
+                            ex:country "{company["location"]["country"]}" ;
+                            ex:city "{company["location"]["city"]}" ;
+                            ex:cityCode "{company["location"]["cityCode"]}" ;
+                            ex:street "{company["location"]["street"]}" ;
+                            ex:houseNumber "{company["location"]["houseNumber"]}" ] ;
+        }}"""
+
+    rdf_graph.update(query)
+
+    return company
 
 
 def get_user_by_id(id):
@@ -398,6 +443,11 @@ def create_app(test_config=None):
     def resolve_user(_, info, id):
         return get_user_by_id(id)
         return next((user for user in users_test_data if user["id"] == id), None)
+
+    @query.field("userByEmail")
+    def resolve_user_by_email(_, info, email):
+        if check_email(email):
+            return None
     
     
     # Resolver for `userByEmail` query
@@ -446,15 +496,15 @@ def create_app(test_config=None):
     
     @mutation.field("createCompany")
     def resolve_create_company(_, info,name, email, password, location):
-        # Check if the email already exists
-        if any(user["email"] == email for user in companies_test_data):
-            raise Exception(f"user with email '{email}' already exists.")
+
+        if not check_email(email):
+            raise Exception(f"company with email '{email}' already exists.")
         
         # Hash the password before saving it
         hashed_password = hash_password(password)
         
         # Create the new user
-        new_id = str(len(users_test_data) + 1)
+        new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
         new_company = {
             "id": new_id,
             "name": name,
@@ -463,7 +513,7 @@ def create_app(test_config=None):
             "location": location,
             "vacancies": []
         }
-        companies_test_data.append(new_company)
+        new_company = add_new_company(new_company)
         return new_company
     
     # Resolver for `updateUser` mutation
@@ -593,6 +643,23 @@ def create_app(test_config=None):
 
     @app.route("/createuser", methods=["POST"])
     def createuser():
+        data = request.get_json()
+
+        #Handle the request
+        success, result = graphql_sync(
+            schema,
+            data,
+            context_value={"request": request},
+            debug=app.debug
+        )
+        status_code = 200 if success else 400
+        # for user in users_test_data:
+        #     print(user)
+        #     print("\n")
+        return jsonify(result), status_code
+
+    @app.route("/createcompany", methods=["POST"])
+    def createcompany():
         data = request.get_json()
 
         #Handle the request
