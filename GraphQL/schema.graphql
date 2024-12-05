@@ -80,13 +80,12 @@ input ExperienceInput {
     description: String
 }
 
-union Profile = User | Company
-
 #Queries
 type Query {
     users: [User]
     companies: [Company]
     user(id: ID!): User
+    company(id: ID!): Company
     userByEmail(email: String!): User
     companyByEmail(email: String!): Company
     vacancies: [Vacancy]

@@ -36,6 +36,64 @@ export const GET_COMPANIES = gql`
   }
 `;
 
+export const GET_USER_BY_ID = gql`
+  query GetUserById($id: ID!) {
+    user(id: $id) {
+      id
+      firstName
+      name
+      email
+      dateOfBirth
+      location {
+        country
+        city
+        cityCode
+        street
+        houseNumber
+      }
+      gender
+      educations {
+        institution
+        degree
+        fieldOfStudy
+        yearGraduated
+      }
+      experiences {
+        companyName
+        jobTitle
+        startDate
+        endDate
+        description
+      }
+    }
+  }
+`;
+
+export const GET_COMPANY_BY_ID = gql`
+  query GetCompanyById($id: ID!) {
+    company(id: $id) {
+      id
+      name
+      email
+      location {
+        country
+        city
+        cityCode
+        street
+        houseNumber
+      }
+      vacancies {
+        id
+        jobTitle
+        requiredSkills
+        startDate
+        endDate
+      }
+    }
+  }
+`;
+
+
 
 export const CHECK_USER_EMAIL_EXISTS = gql`
   query CheckUserEmailExists($email: String!) {
@@ -71,60 +129,6 @@ export const GET_ACTIVE_VACANCIES = gql`
       requiredSkills
       startDate
       endDate
-    }
-  }
-`;
-
-export const GET_PROFILE = gql`
-  query GetProfile($id: ID!) {
-    getProfile(id: $id) {
-      ... on User {
-        id
-        firstName
-        name
-        email
-        location {
-          country
-          city
-          cityCode
-          street
-          houseNumber
-        }
-        gender
-        dateOfBirth
-        educations {
-          institution
-          degree
-          fieldOfStudy
-          yearGraduated
-        }
-        experiences {
-          companyName
-          jobTitle
-          startDate
-          endDate
-          description
-        }
-      }
-      ... on Company {
-        id
-        name
-        email
-        location {
-          country
-          city
-          cityCode
-          street
-          houseNumber
-        }
-        vacancies {
-          id
-          jobTitle
-          requiredSkills
-          startDate
-          endDate
-        }
-      }
     }
   }
 `;
