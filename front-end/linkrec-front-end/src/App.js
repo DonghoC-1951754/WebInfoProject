@@ -13,7 +13,7 @@ import LoginForm from "./components/LoginForm";
 import RegisterForm from "./components/RegisterForm";
 import UserCreationForm from "./components/UserCreationForm";
 import CompanyCreationForm from "./components/CompanyCreationForm";
-import Users from "./components/Users";
+import Profiles from "./components/Profiles";
 import Vacancies from "./components/Vacancies";
 import EmptyPage from "./components/EmptyPage";
 import { ApolloClient, InMemoryCache, ApolloProvider } from "@apollo/client";
@@ -101,7 +101,7 @@ function App() {
               path="/profiles"
               element={
                 <ApolloProvider client={userclient}>
-                    <Users />
+                    <Profiles />
                 </ApolloProvider>
               }
             />
