@@ -9,7 +9,7 @@ const UserCard = ({ id, firstName, lastName, location, email }) => {
             <Link to={`/userProfile/${id}`}>
                 <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white"> {lastName}</h5>
             </Link>
-            <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">Name: {firstName}</p>
+            <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">first Name: {firstName}</p>
             <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">Email: {email}</p>
             <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">Country: {location.country}</p>
             <p className="mb-3 font-normal text-gray-500 dark:text-gray-400">City: {location.city}, {location.cityCode}</p>

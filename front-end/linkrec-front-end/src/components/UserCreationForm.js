@@ -23,9 +23,6 @@ function UserCreationForm() {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const [createUser, { loading, error, data }] = useMutation(CREATE_USER);
-  const [checkUserEmailExists, { loading: emailCheckLoading }] = useLazyQuery(CHECK_USER_EMAIL_EXISTS, {
-    fetchPolicy: "network-only",
-  });
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -92,9 +89,8 @@ function UserCreationForm() {
 
     // Check if the email exists
     try {
-      const { data: emailData } = await checkUserEmailExists({ variables: { email } });
 
-      if (emailData?.userByEmail) {
+      if (error) {
         alert("Email is already in use. Please use a different email.");
         return;
       }
@@ -309,10 +305,10 @@ function UserCreationForm() {
 
               <button
                 onClick={handleSubmit}
-                disabled={loading || emailCheckLoading}
+                disabled={loading}
                 className="w-full h-12 px-6 text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800"
               >
-                {loading || emailCheckLoading ? "Checking..." : "Create Profile"}
+                {loading ? "Checking..." : "Create Profile"}
               </button>
 
               {error && <p className="text-red-500">Error: {error.message}</p>}

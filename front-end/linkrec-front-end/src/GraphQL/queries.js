@@ -95,24 +95,6 @@ export const GET_COMPANY_BY_ID = gql`
   }
 `;
 
-
-
-export const CHECK_USER_EMAIL_EXISTS = gql`
-  query CheckUserEmailExists($email: String!) {
-    userByEmail(email: $email) {
-      id
-    }
-  }
-`;
-
-export const CHECK_COMPANY_EMAIL_EXISTS = gql`
-  query CheckCompanyEmailExists($email: String!) {
-    companyByEmail(email: $email) {
-      id
-    }
-  }
-`;
-
 export const GET_ACTIVE_VACANCIES = gql`
   query GetActiveVacancies($currentDate: Date!) {
     activeVacancies(currentDate: $currentDate) {
