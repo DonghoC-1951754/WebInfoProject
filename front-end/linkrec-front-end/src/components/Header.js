@@ -1,23 +1,8 @@
-import { React, useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { React } from 'react';
+
 
 
 function Header() {
-  const location = useLocation();
-  const [token, setToken] = useState(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const tokenFromUrl = params.get('token');
-
-    if (tokenFromUrl) {
-      setToken(tokenFromUrl);
-      localStorage.setItem('accessToken', tokenFromUrl);
-    } else {
-      console.error('Token is missing');
-    }
-  }, [location]);
-  
   return (
     <header className="bg-gray-800 text-white py-4 ">
       <div className="max-w-8xl mx-auto px-12 flex items-center justify-between">

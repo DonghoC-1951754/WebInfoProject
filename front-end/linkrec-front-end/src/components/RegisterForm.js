@@ -2,6 +2,20 @@ import { React, useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 function RegisterForm() {
+  const location = useLocation();
+  const [token, setToken] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tokenFromUrl = params.get('token');
+
+    if (tokenFromUrl) {
+      setToken(tokenFromUrl);
+      localStorage.setItem('accessToken', tokenFromUrl);
+    } else {
+      console.error('Token is missing');
+    }
+  }, [location]);
 
   return (
     <section className="bg-gray-50 dark:bg-gray-900 flex-grow">

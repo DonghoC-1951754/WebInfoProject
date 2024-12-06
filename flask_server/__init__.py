@@ -18,6 +18,7 @@ import random
 import string
 from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies
 from functools import wraps
+from urllib.parse import urlencode
 
 oauth = OAuth()
 # load in the RDF graph
@@ -378,6 +379,21 @@ def create_app(test_config=None):
         redirect_uri = url_for('callback', _external=True)
         return oauth.auth_client.authorize_redirect(redirect_uri)
     
+    @app.route('/logout')
+    def logout():
+        session.clear()  # This clears all session data (including user authentication)
+
+        # Construct the Auth0 logout URL
+        logout_url = f'https://{env.get("AUTH0_DOMAIN")}/v2/logout'
+        # Set the parameters to redirect the user after logout
+        params = {
+            'client_id': env.get("AUTH0_CLIENT_ID"),
+            'returnTo': "http://localhost:3000"  # URL to redirect to after logout (could be a login page or homepage)
+        }
+
+        # Redirect to Auth0's logout URL
+        return redirect(f"{logout_url}?{urlencode(params)}")
+
     @app.route('/callback')
     def callback():
         token = oauth.auth_client.authorize_access_token(audience="https://auth0-graphql-api")
