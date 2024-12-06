@@ -46,7 +46,7 @@ ex:User2 a ex:User ;
     ex:experiences ex:Experience2, ex:Experience3 .
 
 ex:User3 a ex:User ;
-    ex:id "auth0|6750740042a151293be37fba" ;
+    ex:id "6750740042a151293be37fba" ;
     ex:firstName "Dongho" ;
     ex:name "Chun" ;
     ex:email "dongho.alternative@gmail.com" ;

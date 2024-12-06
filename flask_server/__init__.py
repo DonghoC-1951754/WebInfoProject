@@ -381,13 +381,15 @@ def create_app(test_config=None):
     @app.route('/callback')
     def callback():
         token = oauth.auth_client.authorize_access_token(audience="https://auth0-graphql-api")
-        # userinfo = token['userinfo']
-        # sub = userinfo['sub']
-        # access_token = token['access_token']
-        # id_token = jwt
         id_token = token['id_token']
-        # session['user_id'] = sub
-        # print(f"User ID stored in session: {session.get('user_id')}")
+        user_id = token['userinfo']['sub']
+        if user_id and user_id.startswith("auth0|"):
+                    user_id = user_id.split("|")[1]
+
+        print("User ID: ", user_id)
+        user_by_id = get_user_by_id(user_id, rdf_graph)
+        if user_by_id:
+            return redirect(f'http://localhost:3000/?token={id_token}')
         return redirect(f'http://localhost:3000/registration?token={id_token}')  
 
     # a simple page that says hello
