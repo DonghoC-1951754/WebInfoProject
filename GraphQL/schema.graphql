@@ -11,6 +11,13 @@ type User {
     gender: String!
     educations: [Education!]
     experiences: [Experience!]
+    connections: [UserConnection!]
+}
+type UserConnection{
+    id: ID!
+    fromUserId: ID!
+    toUserId: ID!
+    status: String!
 }
 
 type Company {
@@ -31,6 +38,7 @@ type Location{
 }
 
 type Education {
+    id: ID!
     institution: String!
     degree: String!
     fieldOfStudy: String!
@@ -38,11 +46,14 @@ type Education {
 }
 
 type Experience {
+    id: ID!
     company: Company!
     jobTitle: String!
-    startDate: String
-    endDate: String
+    startDate: Date!
+    endDate: Date!
     description: String
+    requiredSkills: [String]
+    matchedUsers: [User] 
 }
 
 type Vacancy {
@@ -52,6 +63,8 @@ type Vacancy {
     requiredSkills: [String]
     startDate: Date!
     endDate: Date!
+    location: Location!
+    matchedUsers: [User]
 }
 
 
@@ -66,6 +79,7 @@ input LocationInput {
 }
 
 input EducationInput {
+    id: ID
     institution: String!
     degree: String!
     fieldOfStudy: String!
@@ -73,11 +87,22 @@ input EducationInput {
 }
 
 input ExperienceInput {
-    companyName: String!
+    id: ID
+    company: ID!
     jobTitle: String!
     startDate: String
     endDate: String
     description: String
+}
+
+input VacancyInput {
+    id: ID
+    jobTitle: String!
+    company: ID!
+    location: LocationInput!
+    requiredSkills: [String]
+    startDate: Date!
+    endDate: Date!
 }
 
 #Queries
@@ -88,10 +113,12 @@ type Query {
     company(id: ID!): Company
     userByEmail(email: String!): User
     companyByEmail(email: String!): Company
+    activeVacancies(currentDate: Date!): [Vacancy]
+    connections(userId: ID!): [UserConnection!] 
+    matchedUsers(vacancyId: ID!): [User]  # Get matched users for a specific vacancy
+
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
-    activeVacancies(currentDate: Date!): [Vacancy]
-    searchUsersByIndustry(industry: String!): [User]
 }
 
 # Mutation Type: Modify data in the system
@@ -118,16 +145,28 @@ type Mutation {
         id: ID!,
         firstName: String,
         name: String,
-        email: String,
-        password: String,
-        dateOfBirth: Date,
         location: LocationInput,
-        gender: String,
-        educations: [EducationInput!],
-        experiences: [ExperienceInput!]
+        gender: String
     ): User
 
-    createVacancy(jobTitle: String!, companyName: String!, location: String!, requiredSkills: [String]): Vacancy
-    updateVacancy(id: ID!, jobTitle: String, location: String, requiredSkills: [String]): Vacancy
+    #education mutations
+    addUserEducation(userId: ID!, education: EducationInput!): Education
+    updateUserEducation(userId: ID!, educationId: ID!, education: EducationInput!): Education
+    removeUserEducation(userId: ID!, educationId: ID!): String
+
+    #experience mutations
+    addUserExperience(userId: ID!, experience: ExperienceInput!): Experience
+    updateUserExperience(userId: ID!, experienceId: ID!, experience: ExperienceInput!): Experience
+    removeUserExperience(userId: ID!, experienceId: ID!): String
+
+     # Connection mutations
+    sendConnectionRequest(fromUserId: ID!, toUserId: ID!): UserConnection
+    confirmConnectionRequest(connectionId: ID!): UserConnection
+    rejectConnectionRequest(connectionId: ID!): String
+
+    createVacancy(vacancy: VacancyInput!): Vacancy
+    updateVacancy(id: ID!, vacancy: VacancyInput!): Vacancy
     deleteVacancy(id: ID!): String
+    addMatchedUserToVacancy(vacancyId: ID!, userId: ID!): Vacancy
+    removeMatchedUserFromVacancy(vacancyId: ID!, userId: ID!): Vacancy
 }
