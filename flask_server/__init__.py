@@ -83,7 +83,9 @@ def create_app(test_config=None):
         @wraps(func)
         def wrapper(*args, **kwargs):
             # Get token from Authorization header
+            
             auth_header = request.headers.get("Authorization", None)
+            
             if not auth_header:
                 return jsonify({"message": "Authorization header is missing"}), 401
             try:
@@ -111,6 +113,7 @@ def create_app(test_config=None):
                 return jsonify({"message": f"Authentication failed!"}), 401
 
         # If token is valid, continue to the actual endpoint
+            
             return func(*args, **kwargs)
         return wrapper
     
@@ -202,7 +205,14 @@ def create_app(test_config=None):
     # Resolver for `createuser` mutation
     @mutation.field("createUser")
     def resolve_create_user(_, info, firstName, name, email, password, dateOfBirth, location, gender):
-
+        # print(request.headers.get('Authorization'))
+        print("In resolver")
+        userID = info.context.get('user_id')
+        print("In resolver user id", userID)
+        print("Request headers", request.headers)
+        # print(f"Secret Key: {app.secret_key}")
+        # print(f"User ID stored in session: {session.get('user_id')}")
+        # print(session.get('user_id'))
         if not check_email(email, rdf_graph):
             raise Exception(f"user with email '{email}' already exists.")
         
@@ -212,9 +222,9 @@ def create_app(test_config=None):
         # Create the new user
 
 
-        new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
+        # new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
         new_user = {
-            "id": new_id,
+            "id": userID,
             "firstName": firstName,
             "name": name,
             "email": email,
@@ -238,9 +248,11 @@ def create_app(test_config=None):
         hashed_password = hash_password(password)
         
         # Create the new user
-        new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
+        # new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
+        compID = info.context.get('user_id')
+        print("CompId: ", compID)
         new_company = {
-            "id": new_id,
+            "id": compID,
             "name": name,
             "email": email,
             "password": hashed_password,  # Save the hashed password
@@ -326,14 +338,37 @@ def create_app(test_config=None):
     @app.route("/graphql", methods=["POST"])
     def graphqlhandle():
         data = request.get_json()
-
         #Handle the request
+        auth_header = request.headers.get("Authorization")
+        # print(f"Authorization header: {auth_header}")
+        # print(data)
+        user_id = None
+
+        if auth_header:
+            token = auth_header.split("Bearer ")[-1]  # Extract the JWT token from Bearer token
+            try:
+                # Decode the JWT token and extract the user_id (sub)
+                # decoded_token = jwt.decode(token)  # You can also pass a public key if you need to validate it
+                # user_id = decoded_token.get("sub")  # 'sub' is the user ID (usually the Auth0 user ID)
+                jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+                signing_key = jwks_client.get_signing_key_from_jwt(token).key
+                decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
+                user_id = decoded_id_token.get("sub")
+                if user_id and user_id.startswith("auth0|"):
+                    user_id = user_id.split("|")[1]
+
+            except Exception as e:
+                print("Invalid token:", e)
+                user_id = None  # If token is invalid, leave user_id as None
+        
+        print(f"User ID: {user_id}")
         success, result = graphql_sync(
             schema,
             data,
-            context_value={"request": request},
+            context_value={"request": request, "user_id": user_id},
             debug=app.debug
         )
+
         status_code = 200 if success else 400
         return jsonify(result), status_code
 
@@ -346,15 +381,13 @@ def create_app(test_config=None):
     @app.route('/callback')
     def callback():
         token = oauth.auth_client.authorize_access_token(audience="https://auth0-graphql-api")
-        # token = jsonify(token)
-        userinfo = token['userinfo']
-        sub = userinfo['sub']
-        access_token = token['access_token']
+        # userinfo = token['userinfo']
+        # sub = userinfo['sub']
+        # access_token = token['access_token']
         # id_token = jwt
         id_token = token['id_token']
-        # user = oauth.auth_client.parse_id_token(token)
-        print(token)
-        print(access_token)
+        # session['user_id'] = sub
+        # print(f"User ID stored in session: {session.get('user_id')}")
         return redirect(f'http://localhost:3000/registration?token={id_token}')  
 
     # a simple page that says hello

@@ -22,7 +22,13 @@ function UserCreationForm() {
   });
   const [passwordVisible, setPasswordVisible] = useState(false);
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  const [createUser, { loading, error, data }] = useMutation(CREATE_USER);
+  const [createUser, { loading, error, data }] = useMutation(CREATE_USER , {
+    context: {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+      },
+    },
+  });
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;

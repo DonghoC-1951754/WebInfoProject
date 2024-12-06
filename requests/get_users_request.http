@@ -1,5 +1,4 @@
 POST http://127.0.0.1:5000/getusers HTTP/1.1
-Authorization: Bearer testtoken
 Content-Type: application/json
 
 {
