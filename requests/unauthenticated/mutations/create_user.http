@@ -1,0 +1,22 @@
+POST http://127.0.0.1:5000/graphql HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer YOUR_ACCESS_TOKEN  # Include if authentication is required
+
+{
+  "query": "mutation CreateUser($firstName: String!, $name: String!, $email: String!, $password: String!, $dateOfBirth: Date!, $location: LocationInput!, $gender: String!) { createUser(firstName: $firstName, name: $name, email: $email, password: $password, dateOfBirth: $dateOfBirth, location: $location, gender: $gender) { id firstName name email gender dateOfBirth location { country city cityCode street houseNumber } } }",
+  "variables": {
+    "firstName": "Test",
+    "name": "User",
+    "email": "test.user@example.com",
+    "password": "securePassword123",
+    "dateOfBirth": "1990-01-01",
+    "location": {
+      "country": "USA",
+      "city": "New York",
+      "cityCode": "NYC",
+      "street": "123 5th Ave",
+      "houseNumber": "101"
+    },
+    "gender": "Male"
+  }
+}

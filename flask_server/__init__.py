@@ -205,6 +205,8 @@ def create_app(test_config=None):
         # print(request.headers.get('Authorization'))
         print("In resolver")
         userID = info.context.get('user_id')
+        if (userID is None):
+            userID = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
         print("In resolver user id", userID)
         print("Request headers", request.headers)
         # print(f"Secret Key: {app.secret_key}")
@@ -387,8 +389,9 @@ def create_app(test_config=None):
         print("User ID: ", user_id)
         user_by_id = get_user_by_id(user_id, rdf_graph)
         if user_by_id:
-            return redirect(f'http://localhost:3000/?token={id_token}')
-        return redirect(f'http://localhost:3000/registration?token={id_token}')  
+            return redirect(f'http://localhost:3000/?token={id_token}&userID={user_id}')
+        return redirect(f'http://localhost:3000/registration?token={id_token}&userID={user_id}')
+  
 
     # a simple page that says hello
     @app.route('/hello')
