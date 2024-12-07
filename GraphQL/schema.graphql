@@ -5,7 +5,6 @@ type User {
     firstName: String!
     name: String!
     email: String!
-    password: String!
     dateOfBirth: Date!
     location: Location!
     gender: String!
@@ -24,7 +23,6 @@ type Company {
     id: ID!
     name: String!
     email: String!
-    password: String!
     location: Location!
     vacancies: [Vacancy]
 }
@@ -50,7 +48,7 @@ type Experience {
     company: Company!
     jobTitle: String!
     startDate: Date!
-    endDate: Date!
+    endDate: Date
     description: String
     requiredSkills: [String]
     matchedUsers: [User] 
@@ -62,7 +60,7 @@ type Vacancy {
     company: Company!
     requiredSkills: [String]
     startDate: Date!
-    endDate: Date!
+    endDate: Date
     location: Location!
     matchedUsers: [User]
 }
@@ -90,8 +88,8 @@ input ExperienceInput {
     id: ID
     company: ID!
     jobTitle: String!
-    startDate: String
-    endDate: String
+    startDate: Date!
+    endDate: Date
     description: String
 }
 
@@ -102,7 +100,7 @@ input VacancyInput {
     location: LocationInput!
     requiredSkills: [String]
     startDate: Date!
-    endDate: Date!
+    endDate: Date
 }
 
 #Queries
@@ -127,7 +125,6 @@ type Mutation {
         firstName: String!,
         name: String!,
         email: String!,
-        password: String!,
         dateOfBirth: Date!,
         location: LocationInput!,
         gender: String!
@@ -136,7 +133,6 @@ type Mutation {
     createCompany(
         name: String!,
         email: String!,
-        password: String!,
         location: LocationInput!
     ): Company
 

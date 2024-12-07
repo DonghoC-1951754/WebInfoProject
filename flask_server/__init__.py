@@ -198,14 +198,10 @@ def create_app(test_config=None):
     def resolve_active_vacancies(_, info, currentDate):
         return get_all_vacancies(rdf_graph)
 
-    # Helper function to hash passwords
-    def hash_password(password: str) -> str:
-        salt = bcrypt.gensalt()
-        return bcrypt.hashpw(password.encode('utf-8'), salt).decode('utf-8')
 
     # Resolver for `createuser` mutation
     @mutation.field("createUser")
-    def resolve_create_user(_, info, firstName, name, email, password, dateOfBirth, location, gender):
+    def resolve_create_user(_, info, firstName, name, email, dateOfBirth, location, gender):
         # print(request.headers.get('Authorization'))
         print("In resolver")
         userID = info.context.get('user_id')
@@ -217,11 +213,6 @@ def create_app(test_config=None):
         if not check_email(email, rdf_graph):
             raise Exception(f"user with email '{email}' already exists.")
         
-        # Hash the password before saving it
-        hashed_password = hash_password(password)
-        
-        # Create the new user
-
 
         # new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
         new_user = {
@@ -229,7 +220,6 @@ def create_app(test_config=None):
             "firstName": firstName,
             "name": name,
             "email": email,
-            "password": hashed_password,  # Save the hashed password
             "dateOfBirth": dateOfBirth,  # This will be handled by the Date scalar
             "location": location,
             "gender": gender,
@@ -240,15 +230,11 @@ def create_app(test_config=None):
         return new_user
     
     @mutation.field("createCompany")
-    def resolve_create_company(_, info,name, email, password, location):
+    def resolve_create_company(_, info,name, email, location):
 
         if not check_email(email, rdf_graph):
             raise Exception(f"company with email '{email}' already exists.")
         
-        # Hash the password before saving it
-        hashed_password = hash_password(password)
-        
-        # Create the new user
         # new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
         compID = info.context.get('user_id')
         print("CompId: ", compID)
@@ -256,7 +242,6 @@ def create_app(test_config=None):
             "id": compID,
             "name": name,
             "email": email,
-            "password": hashed_password,  # Save the hashed password
             "location": location,
             "vacancies": []
         }
@@ -265,7 +250,7 @@ def create_app(test_config=None):
     
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
-    def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, password=None, educations=None, experiences=None):
+    def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, educations=None, experiences=None):
         user = next((p for p in users_test_data if p["id"] == id), None)
         if not user:
             return None  # Return None if no user matches the ID
@@ -283,9 +268,6 @@ def create_app(test_config=None):
             user["gender"] = gender
         if dateOfBirth:
             user["dateOfBirth"] = dateOfBirth
-        if password:
-            # Hash the password before updating it
-            user["password"] = hash_password(password)
         if educations is not None:
             user["educations"] = educations
         if experiences is not None:

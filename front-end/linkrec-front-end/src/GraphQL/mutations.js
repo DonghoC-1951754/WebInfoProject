@@ -5,7 +5,6 @@ export const CREATE_USER = gql`
     $firstName: String!,
     $name: String!,
     $email: String!,
-    $password: String!,
     $dateOfBirth: Date!,
     $location: LocationInput!,
     $gender: String!
@@ -14,7 +13,6 @@ export const CREATE_USER = gql`
       firstName: $firstName,
       name: $name,
       email: $email,
-      password: $password,
       dateOfBirth: $dateOfBirth,
       location: $location,
       gender: $gender
@@ -40,13 +38,11 @@ export const CREATE_COMPANY = gql`
   mutation createCompany(
     $name: String!,
     $email: String!,
-    $password: String!,
     $location: LocationInput!
   ) {
     createCompany(
       name: $name,
       email: $email,
-      password: $password,
       location: $location
     ) {
       id

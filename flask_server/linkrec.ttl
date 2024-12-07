@@ -70,12 +70,6 @@ ex:email a owl:DatatypeProperty ;
     rdfs:label "email" ;
     rdfs:comment "The email address of the user." .
 
-ex:password a owl:DatatypeProperty ;
-    rdfs:domain ex:User ;
-    rdfs:range xsd:string ;
-    rdfs:label "password" ;
-    rdfs:comment "The hashed password of the user." .
-
 ex:dateOfBirth a owl:DatatypeProperty ;
     rdfs:domain ex:User ;
     rdfs:range xsd:date ;

@@ -50,7 +50,6 @@ def add_new_user(user, graph):
             ex:firstName "{user["firstName"]}" ;
             ex:name "{user["name"]}" ;
             ex:email "{user["email"]}" ;
-            ex:password "{user["password"]}" ;
             ex:dateOfBirth "{user["dateOfBirth"]}"^^xsd:date ;
             ex:gender "{user["gender"]}" ;
             ex:location [ a ex:Location ;
@@ -77,7 +76,6 @@ def add_new_company(company, graph):
             ex:id "{company["id"]}" ;
             ex:name "{company["name"]}" ;
             ex:email "{company["email"]}" ;
-            ex:password "{company["password"]}" ;
             ex:location [ a ex:Location ;
                             ex:country "{company["location"]["country"]}" ;
                             ex:city "{company["location"]["city"]}" ;

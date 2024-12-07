@@ -8,7 +8,6 @@ function UserCreationForm() {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    password: "",
     location: {
       country: "",
       city: "",
@@ -60,18 +59,13 @@ function UserCreationForm() {
     }
   };
 
-  const handlePasswordVisibilityToggle = () => {
-    setPasswordVisible(!passwordVisible);
-  };
-
   const handleSubmit = async () => {
-    const { name, email, password, location } = formData;
+    const { name, email, location } = formData;
 
     // Ensure required fields are filled
     if (
       !name ||
       !email ||
-      !password ||
       !location.country ||
       !location.city ||
       !location.cityCode
@@ -100,7 +94,6 @@ function UserCreationForm() {
         variables: {
           name,
           email,
-          password,
           location,
         },
       });
@@ -146,34 +139,6 @@ function UserCreationForm() {
                         />
                       </div>
                     ))}
-
-                    {/* Password with Show/Hide Toggle */}
-                    <div className="flex flex-col py-3">
-                      <label
-                        htmlFor="password"
-                        className="mb-1 text-gray-500 md:text-lg dark:text-gray-400"
-                      >
-                        Password
-                      </label>
-                      <div className="relative">
-                        <input
-                          id="password"
-                          type={passwordVisible ? "text" : "password"}
-                          value={formData.password}
-                          onChange={handleInputChange}
-                          className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                          placeholder="Password"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={handlePasswordVisibilityToggle}
-                          className="absolute top-1/2 right-3 transform -translate-y-1/2 text-gray-500"
-                        >
-                          {passwordVisible ? "Hide" : "Show"}
-                        </button>
-                      </div>
-                    </div>
 
                     {/* Location Fields */}
                     {[
