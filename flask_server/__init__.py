@@ -209,6 +209,8 @@ def create_app(test_config=None):
         # print(request.headers.get('Authorization'))
         print("In resolver")
         userID = info.context.get('user_id')
+        if (userID is None):
+            userID = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
         print("In resolver user id", userID)
         print("Request headers", request.headers)
         # print(f"Secret Key: {app.secret_key}")
