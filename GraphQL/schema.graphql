@@ -8,15 +8,17 @@ type User {
     dateOfBirth: Date!
     location: Location!
     gender: String!
+    lookingForWork: Boolean!
     educations: [Education!]
     experiences: [Experience!]
     connections: [UserConnection!]
+    skills: [String]
 }
 type UserConnection{
     id: ID!
     fromUserId: ID!
     toUserId: ID!
-    status: String!
+    status: String! #pending, accepted, rejected
 }
 
 type Company {
@@ -50,8 +52,6 @@ type Experience {
     startDate: Date!
     endDate: Date
     description: String
-    requiredSkills: [String]
-    matchedUsers: [User] 
 }
 
 type Vacancy {
@@ -62,7 +62,6 @@ type Vacancy {
     startDate: Date!
     endDate: Date
     location: Location!
-    matchedUsers: [User]
 }
 
 
@@ -106,17 +105,24 @@ input VacancyInput {
 #Queries
 type Query {
     users: [User]
-    companies: [Company]
     user(id: ID!): User
+
+    companies: [Company]
     company(id: ID!): Company
-    userByEmail(email: String!): User
-    companyByEmail(email: String!): Company
+
     activeVacancies(currentDate: Date!): [Vacancy]
-    connections(userId: ID!): [UserConnection!] 
-    matchedUsers(vacancyId: ID!): [User]  # Get matched users for a specific vacancy
+    #possible filtering with the type string
+    connections(userId: ID!, type: String): [UserConnection!]
+    sentConnectionsByUser(userId: ID!): [UserConnection!]
+    receivedConnectionsByUser(userId: ID!): [UserConnection!]
 
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
+    matchingVacancies(userId: ID!, currentDate: Date!): [Vacancy]
+    matchedUsers(vacancyId: ID!): [User]
+    
+    # Fetch vacancies created by a company
+    companyVacancies(companyId: ID!): [Vacancy]
 }
 
 # Mutation Type: Modify data in the system
@@ -143,6 +149,8 @@ type Mutation {
         name: String,
         location: LocationInput,
         gender: String
+        lookingForWork: $lookingForWork!
+      skills: $skills
     ): User
 
     #education mutations
@@ -157,12 +165,10 @@ type Mutation {
 
      # Connection mutations
     sendConnectionRequest(fromUserId: ID!, toUserId: ID!): UserConnection
-    confirmConnectionRequest(connectionId: ID!): UserConnection
-    rejectConnectionRequest(connectionId: ID!): String
+    updateConnectionRequest(connectionId: ID!, status: String!): UserConnection
+    removeConnection(connectionId: ID!): UserConnection
 
     createVacancy(vacancy: VacancyInput!): Vacancy
     updateVacancy(id: ID!, vacancy: VacancyInput!): Vacancy
     deleteVacancy(id: ID!): String
-    addMatchedUserToVacancy(vacancyId: ID!, userId: ID!): Vacancy
-    removeMatchedUserFromVacancy(vacancyId: ID!, userId: ID!): Vacancy
 }

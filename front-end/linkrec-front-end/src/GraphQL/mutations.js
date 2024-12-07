@@ -8,6 +8,8 @@ export const CREATE_USER = gql`
     $dateOfBirth: Date!,
     $location: LocationInput!,
     $gender: String!
+    $lookingForWork: Boolean!
+    $skills: [String]
   ) {
     createUser(
       firstName: $firstName,
@@ -15,7 +17,9 @@ export const CREATE_USER = gql`
       email: $email,
       dateOfBirth: $dateOfBirth,
       location: $location,
-      gender: $gender
+      gender: $gender,
+      lookingForWork: $lookingForWork!
+      skills: $skills
     ) {
       id
       firstName
@@ -23,6 +27,8 @@ export const CREATE_USER = gql`
       email
       gender
       dateOfBirth
+      lookingForWork
+      skills
       location {
         country
         city
@@ -66,17 +72,24 @@ export const UPDATE_USER = gql`
     $name: String,
     $location: LocationInput,
     $gender: String,
+    $lookingForWork: Boolean!
+    $skills: [String]
   ) {
     updateUser(
       id: $id,
       firstName: $firstName,
       name: $name,
       location: $location,
+      gender: $gender,
+      lookingForWork: $lookingForWork!
+      skills: $skills
     ) {
       id
       firstName
       name
       gender
+      lookingForWork
+      skills
       location {
         country
         city
@@ -188,10 +201,10 @@ export const SEND_CONNECTION_REQUEST = gql`
   }
 `;
 
-// Mutation to confirm a connection request
-export const CONFIRM_CONNECTION_REQUEST = gql`
-  mutation ConfirmConnectionRequest($connectionId: ID!) {
-    confirmConnectionRequest(connectionId: $connectionId) {
+
+export const UPDATE_CONNECTION_REQUEST = gql`
+  mutation UpdateConnectionRequest($connectionId: ID!) {
+    updateConnectionRequest(connectionId: $connectionId) {
       id
       fromUser {
         id
@@ -206,10 +219,9 @@ export const CONFIRM_CONNECTION_REQUEST = gql`
   }
 `;
 
-// Mutation to reject a connection request
-export const REJECT_CONNECTION_REQUEST = gql`
-  mutation RejectConnectionRequest($connectionId: ID!) {
-    rejectConnectionRequest(connectionId: $connectionId) {
+export const REMOVE_CONNECTION = gql`
+  mutation RemoveConnection($connectionId: ID!) {
+    removeConnection(connectionId: $connectionId) {
       id
       fromUser {
         id
@@ -276,37 +288,5 @@ export const UPDATE_VACANCY = gql`
 export const DELETE_VACANCY = gql`
   mutation DeleteVacancy($id: ID!) {
     deleteVacancy(id: $id)
-  }
-`;
-
-// Add a matched user to a vacancy
-export const ADD_MATCHED_USER_TO_VACANCY = gql`
-  mutation AddMatchedUserToVacancy($vacancyId: ID!, $userId: ID!) {
-    addMatchedUserToVacancy(vacancyId: $vacancyId, userId: $userId) {
-      id
-      jobTitle
-      matchedUsers {
-        id
-        firstName
-        name
-        email
-      }
-    }
-  }
-`;
-
-// Remove a matched user from a vacancy
-export const REMOVE_MATCHED_USER_FROM_VACANCY = gql`
-  mutation RemoveMatchedUserFromVacancy($vacancyId: ID!, $userId: ID!) {
-    removeMatchedUserFromVacancy(vacancyId: $vacancyId, userId: $userId) {
-      id
-      jobTitle
-      matchedUsers {
-        id
-        firstName
-        name
-        email
-      }
-    }
   }
 `;
