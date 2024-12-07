@@ -4,16 +4,25 @@ import { Link, useLocation } from 'react-router-dom';
 function RegisterForm() {
   const location = useLocation();
   const [token, setToken] = useState(null);
+  const [userID, setUserID] = useState(null);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const tokenFromUrl = params.get('token');
+    const userIDFromUrl = params.get('userID');
 
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
       localStorage.setItem('accessToken', tokenFromUrl);
     } else {
       console.error('Token is missing');
+    }
+
+    if (userIDFromUrl) {
+      setUserID(userIDFromUrl);
+      localStorage.setItem('userID', userIDFromUrl);
+    } else {
+      console.error('UserID is missing');
     }
   }, [location]);
 
