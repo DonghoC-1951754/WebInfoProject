@@ -121,8 +121,8 @@ export const UPDATE_COMPANY = gql`
 
 // Add Education to a User
 export const ADD_USER_EDUCATION = gql`
-  mutation AddUserEducation($userId: ID!, $education: EducationInput!) {
-    addUserEducation(userId: $userId, education: $education) {
+  mutation addUserEducation( $userId: ID!, $institution: String!, $degree: String!, $fieldOfStudy: String!, $yearGraduated: Int,) {
+    addUserEducation(userId: $userId, institution: $institution, degree: $degree, fieldOfStudy: $fieldOfStudy, yearGraduated:$yearGraduated) {
       id
       institution
       degree
@@ -132,29 +132,6 @@ export const ADD_USER_EDUCATION = gql`
   }
 `;
 
-// Update Education of a User
-export const UPDATE_USER_EDUCATION = gql`
-  mutation UpdateUserEducation(
-    $userId: ID!,
-    $educationId: ID!,
-    $education: EducationInput!
-  ) {
-    updateUserEducation(userId: $userId, educationId: $educationId, education: $education) {
-      id
-      institution
-      degree
-      fieldOfStudy
-      yearGraduated
-    }
-  }
-`;
-
-// Remove Education from a User
-export const REMOVE_USER_EDUCATION = gql`
-  mutation RemoveUserEducation($userId: ID!, $educationId: ID!) {
-    removeUserEducation(userId: $userId, educationId: $educationId)
-  }
-`;
 
 // Add Experience to a User
 export const ADD_USER_EXPERIENCE = gql`
@@ -173,26 +150,6 @@ export const ADD_USER_EXPERIENCE = gql`
   }
 `;
 
-// Update Experience of a User
-export const UPDATE_USER_EXPERIENCE = gql`
-  mutation UpdateUserExperience(
-    $userId: ID!,
-    $experienceId: ID!,
-    $experience: ExperienceInput!
-  ) {
-    updateUserExperience(userId: $userId, experienceId: $experienceId, experience: $experience) {
-      id
-      company {
-        id
-        name
-      }
-      jobTitle
-      startDate
-      endDate
-      description
-    }
-  }
-`;
 
 // Remove Experience from a User
 export const REMOVE_USER_EXPERIENCE = gql`

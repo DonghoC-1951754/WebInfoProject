@@ -118,9 +118,6 @@ type Query {
     vacancy(id: ID!): Vacancy
     matchingVacancies(userId: ID!, currentDate: Date!): [Vacancy]
     matchedUsers(vacancyId: ID!): [User]
-    
-    # Fetch vacancies created by a company
-    companyVacancies(companyId: ID!): [Vacancy]
 }
 
 # Mutation Type: Modify data in the system
@@ -158,13 +155,16 @@ type Mutation {
     ): Company
 
     #education mutations
-    addUserEducation(userId: ID!, education: EducationInput!): Education
-    updateUserEducation(userId: ID!, educationId: ID!, education: EducationInput!): Education
-    removeUserEducation(userId: ID!, educationId: ID!): String
+    addUserEducation(
+        userId: ID!, 
+        institution: String!,
+        degree: String!,
+        fieldOfStudy: String!,
+        yearGraduated: Int,
+    ): Education
 
     #experience mutations
     addUserExperience(userId: ID!, companyId: ID!, jobTitle: String!, startDate: Date!, endDate: Date, description: String): Experience
-    updateUserExperience(userId: ID!, experienceId: ID!, experience: ExperienceInput!): Experience
     removeUserExperience(userId: ID!, experienceId: ID!): String
 
      # Connection mutations

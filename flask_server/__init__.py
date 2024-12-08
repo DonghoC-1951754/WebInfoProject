@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience, get_all_users
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience, get_all_users, make_user_education
 from functools import wraps
 from urllib.parse import urlencode
 from graphql import GraphQLError
@@ -156,9 +156,7 @@ def create_app(test_config=None):
         user = get_user_by_id(userId, rdf_graph)
         return user["connections"]
     
-    # @query.field("vacancy")
-    # def resolve_vacancy_by_id(_, info, id):
-    #     return next((p for p in vacancies_test_data if p["id"] == id), None)
+
     
     # query for getting the matching vacancies for a user
     @query.field("matchingVacancies")
@@ -200,11 +198,6 @@ def create_app(test_config=None):
                             break
         return matched_users
     
-    # # gets the vacancies of the company with the given id
-    # @query.field("companyVacancies")
-    # def resolve_company_vacancies(_, info, id):
-    #     #return the vacancies of the company with the given id
-    #     return next((p for p in companies_test_data if p["id"] == id), None)["vacancies"]
 
     @mutation.field("addUserExperience")
     def resolve_add_user_experience(_, info, userId, companyId, jobTitle, startDate, endDate, description):
@@ -224,6 +217,22 @@ def create_app(test_config=None):
         if company is None:
             raise GraphQLError(f"Company with id '{companyId}' does not exist.")
         return make_user_experience(userId, companyId, jobTitle, startDate, endDate, description, rdf_graph)
+
+    @mutation.field("addUserEducation")
+    def resolve_add_user_education(_, info, userId, institution, degree, fieldOfStudy, yearGraduated):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+        userID = info.context.get('user_id')
+        if (userID != userId):
+            raise GraphQLError(f"You are not allowed to add education for user with id '{userId}'.")
+        ############################################
+
+        global rdf_graph
+        user = get_user_by_id(userId, rdf_graph)
+        if user is None:
+            raise GraphQLError(f"User with id '{userId}' does not exist.")
+        return make_user_education(userId, institution, degree, fieldOfStudy, yearGraduated, rdf_graph)
 
     @mutation.field("sendConnectionRequest")
     def resolve_send_connection_request(_, info, fromUserId, toUserId):

@@ -888,6 +888,59 @@ def make_user_experience(userId, companyId, jobTitle, startDate, endDate, descri
 
     return userexp
 
+def make_user_education(userId, institution, degree, fieldOfStudy, yearGraduated, graph):
+    educationId = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT {{
+        ex:{educationId} a ex:Education ;
+            ex:id "{educationId}" ;
+            ex:institution "{institution}" ;
+            ex:degree "{degree}" ;
+            ex:fieldOfStudy "{fieldOfStudy}" ;
+            ex:yearGraduated "{yearGraduated}"^^xsd:date .
+        ?user ex:educations ex:{educationId} .
+    }} WHERE {{
+        ?user a ex:User ;
+                ex:id "{userId}" .
+    }}
+    """
+
+    graph.update(query)
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?institution ?degree ?fieldOfStudy ?yearGraduated
+    WHERE {{
+        ?education a ex:Education ;
+                    ex:id "{educationId}" ;
+                    ex:institution ?institution ;
+                    ex:degree ?degree ;
+                    ex:fieldOfStudy ?fieldOfStudy ;
+                    ex:yearGraduated ?yearGraduated .
+    }}
+    """
+
+    query_results = graph.query(query)
+
+    education = {}
+
+    for row in query_results:
+        education = {
+            "id": educationId,
+            "institution": str(row["institution"]),
+            "degree": str(row["degree"]),
+            "fieldOfStudy": str(row["fieldOfStudy"]),
+            "yearGraduated": row["yearGraduated"].toPython()
+        }
+
+    return education
+
 def get_all_users(graph):
     query = """
     PREFIX ex: <http://example.com/schema#>
