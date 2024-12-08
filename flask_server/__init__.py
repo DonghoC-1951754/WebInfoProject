@@ -264,8 +264,8 @@ def create_app(test_config=None):
     
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
-    def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, educations=None, experiences=None):
-        user, graph = update_user(id, firstName, name, location, gender, educations, experiences, rdf_graph)
+    def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, lookingForWork=None, skills=None, dateOfBirth=None, educations=None, experiences=None):
+        user, graph = update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, rdf_graph)
         
         return user
 

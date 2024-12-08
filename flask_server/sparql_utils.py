@@ -90,6 +90,7 @@ def add_new_user(user, graph):
             ex:email "{user["email"]}" ;
             ex:dateOfBirth "{user["dateOfBirth"]}"^^xsd:date ;
             ex:gender "{user["gender"]}" ;
+            ex:lookingForWork "true"^^xsd:boolean ;
             ex:location [ a ex:Location ;
                             ex:country "{user["location"]["country"]}" ;
                             ex:city "{user["location"]["city"]}" ;
@@ -131,7 +132,7 @@ def get_user_by_id(id, graph):
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender ?lookingForWork
     WHERE {{
       ?user a ex:User ;
             ex:id "{id}" ;
@@ -140,6 +141,7 @@ def get_user_by_id(id, graph):
             ex:email ?email ;
             ex:dateOfBirth ?dateOfBirth ;
             ex:gender ?gender ;
+            ex:lookingForWork ?lookingForWork ;
             ex:location ?location .
 
       ?location ex:country ?country ;
@@ -149,6 +151,8 @@ def get_user_by_id(id, graph):
                 ex:houseNumber ?houseNumber .
     }}
     """
+
+    print(query)
 
     # get the education of the user
     queryEducation = f"""
@@ -169,12 +173,13 @@ def get_user_by_id(id, graph):
     queryExperience = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?companyName ?jobTitle ?startDate ?endDate ?description
+    SELECT ?companyId ?companyName ?jobTitle ?startDate ?endDate ?description
     WHERE {{
         ?user a ex:User ;
                 ex:id "{id}" ;
                 ex:experiences ?experience .
         ?experience ex:Company ?company ;
+                    ex:id ?companyId ;  
                     ex:jobTitle ?jobTitle ;
                     ex:startDate ?startDate ;
                     ex:description ?description .
@@ -190,6 +195,7 @@ def get_user_by_id(id, graph):
     user = {}
 
     for row in query_results:
+        print("been here")
         user = {
             "id": id,
             "firstName": str(row["firstName"]),
@@ -204,9 +210,14 @@ def get_user_by_id(id, graph):
                 "houseNumber": str(row["houseNumber"])
             },
             "gender": str(row["gender"]),
+            "lookingForWork": bool(row["lookingForWork"]),
+            "skills": [],
+            "connections": [],   
             "educations": [],
             "experiences": []
         }
+
+    print("user", user)
 
     for row in query_results_education:
         education = {
@@ -221,6 +232,7 @@ def get_user_by_id(id, graph):
         endDate = row["endDate"].toPython() if row["endDate"] != None else None
         experience = {
             "company" : {
+                "id" : str(row["companyId"]),
                 "name": str(row["companyName"])
             },
             "jobTitle": str(row["jobTitle"]),
@@ -418,7 +430,7 @@ def get_active_vacancies(graph):
 
     return active_vacancies
 
-def update_user(id, firstName, name, location, gender, educations, experiences, graph):
+def update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, graph):
     query = f"""
     PREFIX ex: <http://example.com/schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -473,7 +485,7 @@ def update_user(id, firstName, name, location, gender, educations, experiences, 
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber ?lookingForWork
     WHERE {{
       ?user a ex:User ;
             ex:id "{id}" ;
@@ -482,6 +494,7 @@ def update_user(id, firstName, name, location, gender, educations, experiences, 
             ex:email ?email ;
             ex:dateOfBirth ?dateOfBirth ;
             ex:gender ?gender ;
+            ex:lookingForWork ?lookingForWork ;
             ex:location ?location .
 
       ?location ex:country ?country ;
@@ -502,6 +515,8 @@ def update_user(id, firstName, name, location, gender, educations, experiences, 
             "email": str(row["email"]),
             "dateOfBirth": row["dateOfBirth"].toPython(),
             "gender" : str(row["gender"]),
+            "lookingForWork": bool(row["lookingForWork"]),
+            "skills": [],
             "location": {
                 "country": str(row["country"]),
                 "city": str(row["city"]),

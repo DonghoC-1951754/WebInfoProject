@@ -82,6 +82,12 @@ ex:gender a owl:DatatypeProperty ;
     rdfs:label "gender" ;
     rdfs:comment "The gender of the user." .
 
+ex:lookingForWork a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "lookingForWork" ;
+    rdfs:comment "Indication if user is actively looking for a job." .
+
 ex:location a owl:ObjectProperty ;
     rdfs:domain ex:User ;
     rdfs:range ex:Location ;

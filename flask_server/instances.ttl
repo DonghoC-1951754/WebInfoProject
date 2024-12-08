@@ -28,6 +28,7 @@ ex:User1 a ex:User ;
     ex:email "john.doe@example.com" ;
     ex:dateOfBirth "1985-07-15"^^xsd:date ;
     ex:gender "Male" ;
+    ex:lookingForWork "true"^^xsd:boolean ;
     ex:location ex:Location1 ;
     ex:educations ex:Education1, ex:Education2 ;
     ex:experiences ex:Experience1 .
@@ -39,6 +40,7 @@ ex:User2 a ex:User ;
     ex:email "jane.smith@example.com" ;
     ex:dateOfBirth "1990-02-20"^^xsd:date ;
     ex:gender "Female" ;
+    ex:lookingForWork "false"^^xsd:boolean ;
     ex:location ex:Location2 ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .
@@ -50,6 +52,7 @@ ex:User3 a ex:User ;
     ex:email "dongho.alternative@gmail.com" ;
     ex:dateOfBirth "1990-02-20"^^xsd:date ;
     ex:gender "Male" ;
+    ex:lookingForWork "true"^^xsd:boolean ;
     ex:location ex:Location2 ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .

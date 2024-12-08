@@ -51,7 +51,6 @@ export const GET_USER_BY_ID = gql`
         status
       }
       educations {
-        id
         institution
         degree
         fieldOfStudy
