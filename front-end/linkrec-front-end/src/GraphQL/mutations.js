@@ -158,8 +158,8 @@ export const REMOVE_USER_EDUCATION = gql`
 
 // Add Experience to a User
 export const ADD_USER_EXPERIENCE = gql`
-  mutation AddUserExperience($userId: ID!, $experience: ExperienceInput!) {
-    addUserExperience(userId: $userId, experience: $experience) {
+  mutation addUserExperience($userId: ID!, $companyId: ID!, $jobTitle: String!, $startDate: Date!, $endDate: Date, $description: String) {
+    addUserExperience(userId: $userId, companyId: $companyId, jobTitle: $jobTitle, startDate: $startDate, endDate: $endDate, description: $description) {
       id
       company {
         id

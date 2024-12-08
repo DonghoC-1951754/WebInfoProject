@@ -181,12 +181,12 @@ def get_user_by_id(id, graph):
                 ex:id "{id}" ;
                 ex:experiences ?experience .
         ?experience ex:Company ?company ;
-                    ex:id ?companyId ;  
                     ex:jobTitle ?jobTitle ;
                     ex:startDate ?startDate ;
                     ex:description ?description .
         OPTIONAL {{ ?experience ex:endDate ?endDate . }}
         ?company ex:name ?companyName .
+        ?company ex:id ?companyId .
     }}
     """
 
@@ -203,6 +203,7 @@ def get_user_by_id(id, graph):
 
     query_results = graph.query(query)
     query_results_education = graph.query(queryEducation)
+    print(queryExperience)
     query_results_experience = graph.query(queryExperience)
     query_results_skills = graph.query(query_skills)
     
@@ -314,7 +315,7 @@ def get_user_by_id(id, graph):
         }
         user["connections"].append(connection)
 
-    print("user", user)
+    # print("user", user)
 
     return user
 
@@ -863,3 +864,72 @@ def delete_connection(connectionId, graph):
     graph.update(query)
 
     return connectionId
+
+def make_user_experience(userId, companyId, jobTitle, startDate, endDate, description, graph):
+    experienceId = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT {{
+        ex:{experienceId} a ex:Experience ;
+            ex:id "{experienceId}" ;
+            ex:Company ?company ;
+            ex:jobTitle "{jobTitle}" ;
+            ex:startDate "{startDate}"^^xsd:date ;"""
+    if endDate:
+        query += f"""
+            ex:endDate "{endDate}"^^xsd:date ;"""
+
+    query += f"""
+            ex:description "{description}" .
+        ?user ex:experiences ex:{experienceId} .
+    }} WHERE {{
+        ?company a ex:Company ;
+                ex:id "{companyId}" .
+        ?user a ex:User ;
+                ex:id "{userId}" .
+    }}
+    """
+    print(query)
+    graph.update(query)
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?companyName ?jobTitle ?startDate ?endDate ?description
+    WHERE {{
+        ?company a ex:Company ;
+                ex:id "{companyId}" ;
+                ex:name ?companyName .
+        ?experience a ex:Experience ;
+                    ex:id "{experienceId}" ;
+                    ex:Company ?company ;
+                    ex:jobTitle ?jobTitle ;
+                    ex:startDate ?startDate ;
+                    ex:description ?description .
+    }}
+    """
+
+    query_results = graph.query(query)
+    userexp = {}
+
+    for row in query_results:
+        userexp = {
+            "id": experienceId,
+            "company": {
+                "id": companyId,
+                "name": str(row["companyName"])
+            },
+            "jobTitle": str(row["jobTitle"]),
+            "startDate": row["startDate"].toPython(),
+            "endDate": None,
+            "description": str(row["description"])
+        }
+
+    if endDate:
+        userexp["endDate"] = endDate
+
+    return userexp

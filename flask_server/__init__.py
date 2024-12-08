@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience
 from functools import wraps
 from urllib.parse import urlencode
 from graphql import GraphQLError
@@ -203,6 +203,17 @@ def create_app(test_config=None):
     #     #return the vacancies of the company with the given id
     #     return next((p for p in companies_test_data if p["id"] == id), None)["vacancies"]
 
+    @mutation.field("addUserExperience")
+    def resolve_add_user_experience(_, info, userId, companyId, jobTitle, startDate, endDate, description):
+        print("addUserExperience")
+        global rdf_graph
+        user = get_user_by_id(userId, rdf_graph)
+        if user is None:
+            raise GraphQLError(f"User with id '{userId}' does not exist.")
+        company = get_companiy_by_id(companyId, rdf_graph)
+        if company is None:
+            raise GraphQLError(f"Company with id '{companyId}' does not exist.")
+        return make_user_experience(userId, companyId, jobTitle, startDate, endDate, description, rdf_graph)
 
     @mutation.field("sendConnectionRequest")
     def resolve_send_connection_request(_, info, fromUserId, toUserId):

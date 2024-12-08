@@ -163,7 +163,7 @@ type Mutation {
     removeUserEducation(userId: ID!, educationId: ID!): String
 
     #experience mutations
-    addUserExperience(userId: ID!, experience: ExperienceInput!): Experience
+    addUserExperience(userId: ID!, companyId: ID!, jobTitle: String!, startDate: Date!, endDate: Date, description: String): Experience
     updateUserExperience(userId: ID!, experienceId: ID!, experience: ExperienceInput!): Experience
     removeUserExperience(userId: ID!, experienceId: ID!): String
 
