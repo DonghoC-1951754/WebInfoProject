@@ -199,6 +199,10 @@ export const GET_MATCHING_VACANCIES = gql`
       company {
         id
         name
+        location {
+          city
+          cityCode
+        }
       }
       requiredSkills
       startDate

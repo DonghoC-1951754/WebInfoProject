@@ -160,24 +160,24 @@ def create_app(test_config=None):
     # def resolve_vacancy_by_id(_, info, id):
     #     return next((p for p in vacancies_test_data if p["id"] == id), None)
     
-    # # query for getting the matching vacancies for a user
-    # @query.field("matchingVacancies")
-    # def resolve_user_matching_vacancies(_, info, id):
-    #     user = get_user_by_id(id, rdf_graph)
-    #     user_skills = user["skills"]
-    #     user_cityCode = user["location"]["cityCode"]
-    #     matching_vacancies = []
-    #     vacancies = get_all_vacancies(rdf_graph)
-    #     #if vacancy city code matches user OR a skill in the users skills matches a required skill add it in
-    #     for vacancy in vacancies:
-    #         if vacancy["company"]["location"]["cityCode"] == user_cityCode:
-    #             matching_vacancies.append(vacancy)
-    #         else:
-    #             for skill in user_skills:
-    #                 if skill in vacancy["requiredSkills"]:
-    #                     matching_vacancies.append(vacancy)
-    #                     break
-    #     return matching_vacancies
+    # query for getting the matching vacancies for a user
+    @query.field("matchingVacancies")
+    def resolve_user_matching_vacancies(_, info, userId, currentDate):
+        user = get_user_by_id(userId, rdf_graph)
+        user_skills = user["skills"]
+        user_cityCode = user["location"]["cityCode"]
+        matching_vacancies = []
+        vacancies = get_all_vacancies(rdf_graph)
+        #if vacancy city code matches user OR a skill in the users skills matches a required skill add it in
+        for vacancy in vacancies:
+            if str(vacancy["company"]["location"]["cityCode"]) == user_cityCode:
+                matching_vacancies.append(vacancy)
+            else:
+                for skill in user_skills:
+                    if skill in vacancy["requiredSkills"]:
+                        matching_vacancies.append(vacancy)
+                        break
+        return matching_vacancies
     
     # # gets the users that match the given vacancy
     #TODOsparql jeroen
