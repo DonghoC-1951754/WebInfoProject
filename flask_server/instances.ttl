@@ -139,3 +139,23 @@ ex:Vacancy3 a ex:Vacancy ;
     ex:requiredSkills "Machine Learning", "Python", "TensorFlow" ;
     ex:startDate "2024-06-01"^^xsd:date ;
     ex:endDate "2025-05-31"^^xsd:date .
+
+
+### Example User Connections
+ex:UserConnection1 a ex:UserConnection ;
+    ex:id "UC001" ;
+    ex:fromUser ex:User1 ;
+    ex:toUser ex:User2 ;
+    ex:status "Connected" .
+
+ex:UserConnection2 a ex:UserConnection ;
+    ex:id "UC002" ;
+    ex:fromUser ex:User2 ;
+    ex:toUser ex:User3 ;
+    ex:status "Pending" .
+
+ex:UserConnection3 a ex:UserConnection ;    
+    ex:id "UC003" ;
+    ex:fromUser ex:User3 ;
+    ex:toUser ex:User1 ;
+    ex:status "Connected" .
