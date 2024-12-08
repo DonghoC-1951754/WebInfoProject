@@ -203,11 +203,15 @@ export const REMOVE_USER_EXPERIENCE = gql`
 
 // Mutation to send a connection request
 export const SEND_CONNECTION_REQUEST = gql`
-  mutation SendConnectionRequest($fromUserId: ID!, $toUserId: ID!) {
+  mutation sendConnectionRequest($fromUserId: ID!, $toUserId: ID!) {
     sendConnectionRequest(fromUserId: $fromUserId, toUserId: $toUserId) {
       id
-      fromUserId
-      toUserId
+      fromUser {
+        id
+      }
+      toUser {
+        id
+      }
       status
     }
   }
@@ -218,8 +222,12 @@ export const UPDATE_CONNECTION_REQUEST = gql`
   mutation UpdateConnectionRequest($connectionId: ID!, $status: String!) {
     updateConnectionRequest(connectionId: $connectionId, status: $status) {
       id
-      fromUserId
-      toUserId
+      fromUser {
+        id
+      }
+      toUser {
+        id
+      }
       status
     }
   }

@@ -1,5 +1,7 @@
 from rdflib import Graph, Literal, Namespace, URIRef
 import datetime
+import random
+import string
 
 
 def check_email(email, graph):
@@ -132,7 +134,7 @@ def get_user_by_id(id, graph):
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender ?lookingForWork ?skills
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender ?lookingForWork
     WHERE {{
       ?user a ex:User ;
             ex:id "{id}" ;
@@ -142,7 +144,6 @@ def get_user_by_id(id, graph):
             ex:dateOfBirth ?dateOfBirth ;
             ex:gender ?gender ;
             ex:lookingForWork ?lookingForWork ;
-            ex:skills ?skills ;
             ex:location ?location .
 
       ?location ex:country ?country ;
@@ -189,14 +190,26 @@ def get_user_by_id(id, graph):
     }}
     """
 
+    query_skills = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?skills
+    WHERE {{
+        ?user a ex:User ;
+                ex:id "{id}" ;
+                ex:skills ?skills .
+    }}
+    """
+
     query_results = graph.query(query)
     query_results_education = graph.query(queryEducation)
     query_results_experience = graph.query(queryExperience)
+    query_results_skills = graph.query(query_skills)
     
     user = {}
     qskills = []
 
-    for row in query_results:
+    for row in query_results_skills:
         qskills.append(str(row["skills"]))
 
     for row in query_results:
@@ -223,8 +236,6 @@ def get_user_by_id(id, graph):
 
     user["skills"] = qskills
 
-    print("user", user)
-
     for row in query_results_education:
         education = {
             "institution": str(row["institution"]),
@@ -247,6 +258,63 @@ def get_user_by_id(id, graph):
             "description": str(row["description"])
         }
         user["experiences"].append(experience)
+
+    # get the connections of the user
+    queryConnections = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?connectionId ?userFromId ?userFromName ?userToId ?userToName ?status
+    WHERE {{
+        {{?connectionfrom a ex:UserConnection ;
+                    ex:id ?connectionId ;
+                    ex:fromUser ?userfrom ;
+                    ex:toUser ?userto ;
+                    ex:status ?status .
+        ?userfrom a ex:User ;
+                ex:id ?userFromId ;
+                ex:firstName ?userFromName .
+        ?userto a ex:User ;
+                ex:id ?userToId ;
+                ex:firstName ?userToName .
+        FILTER (?userFromId = "{id}")
+        }}
+        UNION
+        {{?connectionto a ex:UserConnection ;
+                    ex:id ?connectionId ;
+                    ex:fromUser ?userfrom ;
+                    ex:toUser ?userto ;
+                    ex:status ?status .
+        ?userfrom a ex:User ;
+                ex:id ?userFromId ;
+                ex:firstName ?userFromName .
+        ?userto a ex:User ;
+                ex:id ?userToId ;
+                ex:firstName ?userToName .
+        FILTER (?userToId = "{id}")
+        }}
+
+    }}
+    """
+
+    query_results_connections = graph.query(queryConnections)
+
+    for row in query_results_connections:
+        print("in loop")
+        connection = {
+            "id": str(row["connectionId"]),
+            "fromUser": {
+                "id": str(row["userFromId"]),
+                "name": str(row["userFromName"])
+            },
+            "toUser": {
+                "id": str(row["userToId"]),
+                "name": str(row["userToName"])
+            },
+            "status": str(row["status"])
+        }
+        user["connections"].append(connection)
+
+    print("user", user)
 
     return user
 
@@ -491,7 +559,7 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber ?lookingForWork ?skills
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber ?lookingForWork
     WHERE {{
       ?user a ex:User ;
             ex:id "{id}" ;
@@ -501,7 +569,6 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
             ex:dateOfBirth ?dateOfBirth ;
             ex:gender ?gender ;
             ex:lookingForWork ?lookingForWork ;
-            ex:skills ?skills ;
             ex:location ?location .
 
       ?location ex:country ?country ;
@@ -514,11 +581,22 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
 
     query_results = graph.query(query)
 
-    # group 
+    skills_query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?skills
+    WHERE {{
+        ?user a ex:User ;
+                ex:id "{id}" ;
+                ex:skills ?skills .
+    }}
+    """
 
     qskills = []
 
-    for row in query_results:
+    skills = graph.query(skills_query)
+
+    for row in skills:
         qskills.append(str(row["skills"]))
 
     for row in query_results:
@@ -544,6 +622,153 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
 
     print(user)
     
-    return user, graph
+    return user
+
+def make_connection_request(fromUserId, toUserId, graph):
+
+    connectionid = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT {{
+        ex:{connectionid} a ex:UserConnection ;
+            ex:id "{connectionid}" ;
+            ex:fromUser ?fromUser ;
+            ex:toUser ?toUser ;
+            ex:status "pending" .
+    }}
+    WHERE {{
+        ?fromUser a ex:User ;
+                ex:id "{fromUserId}" .
+        ?toUser a ex:User ;
+                ex:id "{toUserId}" .
+    }}
+    """
+
+    print(query)
+
+    connection = {
+        "id": connectionid,
+        "fromUser": {
+            "id": fromUserId
+        },
+        "toUser": {
+            "id": toUserId
+        },
+        "status": "pending"
+    }   
+
+    graph.update(query)
+
+    # get all connections and print
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    SELECT ?connectionId ?userFromId ?userFromName ?userToId ?userToName ?status
+    WHERE {{
+        ?connectionfrom a ex:UserConnection ;
+                    ex:id ?connectionId ;
+                    ex:fromUser ?userfrom ;
+                    ex:toUser ?userto ;
+                    ex:status ?status .
+        ?userfrom a ex:User ;
+                ex:id ?userFromId ;
+                ex:firstName ?userFromName .
+        ?userto a ex:User ;
+                ex:id ?userToId ;
+                ex:firstName ?userToName .
+    }}
+    """
+
+    query_results_connections = graph.query(query)
+
+    for row in query_results_connections:
+        print("connection from ", str(row['userFromName']), "to", str(row['userToName']))
+
+    return connection
 
 
+def update_connection_request(connectionId, status, rdf_graph):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    DELETE {{
+        ?connection ex:status ?status .
+    }} 
+    WHERE {{
+        ?connection a ex:UserConnection ;
+                    ex:id "{connectionId}" ;
+                    ex:status ?status .
+    }}
+    """
+
+    rdf_graph.update(query)
+
+    query = f"""
+    INSERT {{
+        ?connection ex:status "{status}" .
+    }}
+    WHERE {{
+        ?connection a ex:UserConnection ;
+                    ex:id "{connectionId}".
+    }}
+    """
+
+    rdf_graph.update(query)
+
+    get_connection_query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?fromId ?toId ?status
+    WHERE {{
+        ?connection a ex:UserConnection ;
+            ex:id "{connectionId}" ;
+            ex:fromUser ?from ;
+            ex:toUser ?to ;
+            ex:status ?status .
+
+        ?from ex:id ?fromId .
+        ?to ex:id ?toId .
+    }}
+    """
+
+    query_results = rdf_graph.query(get_connection_query)
+
+    connection = {}
+
+    for row in query_results:
+        connection = {
+            "id": connectionId,
+            "fromUser": {
+                "id": str(row["fromId"])
+            },
+            "toUser": {
+                "id": str(row["toId"])
+            },
+            "status": str(row["status"])
+        }
+
+    return connection
+
+def delete_connection(connectionId, graph):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    DELETE {{
+        ?connection ?p ?o .
+    }}
+    WHERE {{
+        ?connection a ex:UserConnection ;
+                    ex:id "{connectionId}" .
+        ?connection ?p ?o .
+    }}
+    """
+
+    graph.update(query)
+
+    return connectionId

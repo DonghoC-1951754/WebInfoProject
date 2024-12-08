@@ -112,7 +112,7 @@ type Query {
 
     activeVacancies(currentDate: Date!): [Vacancy]
     #possible filtering with the type string
-    userConnections(userId: ID!, type: String!): [UserConnection!]
+    userConnections(userId: ID!): [UserConnection!]
 
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy

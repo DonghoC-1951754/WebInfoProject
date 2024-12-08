@@ -1,0 +1,10 @@
+POST http://127.0.0.1:5000/graphql HTTP/1.1
+Content-Type: application/json
+
+{
+  "query": "mutation UpdateConnectionRequest($connectionId: ID!, $status: String!) { updateConnectionRequest(connectionId: $connectionId, status: $status) { id fromUser { id } toUser { id } status } }",
+  "variables": {
+    "connectionId": "UC002",
+    "status": "Connected"
+  }
+}

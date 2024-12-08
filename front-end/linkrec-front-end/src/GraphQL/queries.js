@@ -136,8 +136,8 @@ export const GET_ACTIVE_VACANCIES = gql`
 `;
 
 export const GET_USER_CONNECTIONS = gql`
-  query GetUserConnections($userId: ID!, $type: String) {
-    userConnections(userId: $userId, type: $type) {
+  query GetUserConnections($userId: ID!) {
+    userConnections(userId: $userId) {
       id
       fromUser {
         id

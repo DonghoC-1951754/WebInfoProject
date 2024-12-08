@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection
 from functools import wraps
 from urllib.parse import urlencode
 from graphql import GraphQLError
@@ -151,10 +151,10 @@ def create_app(test_config=None):
     def resolve_active_vacancies(_, info, currentDate):
         return get_active_vacancies(rdf_graph)
 
-    # @query.field("userConnections")
-    # def resolve_user_connections(_, info, id):
-    #     user = get_user_by_id(id, rdf_graph)
-    #     return user["connections"]
+    @query.field("userConnections")
+    def resolve_user_connections(_, info, userId):
+        user = get_user_by_id(userId, rdf_graph)
+        return user["connections"]
     
     # @query.field("vacancy")
     # def resolve_vacancy_by_id(_, info, id):
@@ -202,6 +202,41 @@ def create_app(test_config=None):
     # def resolve_company_vacancies(_, info, id):
     #     #return the vacancies of the company with the given id
     #     return next((p for p in companies_test_data if p["id"] == id), None)["vacancies"]
+
+
+    @mutation.field("sendConnectionRequest")
+    def resolve_send_connection_request(_, info, fromUserId, toUserId):
+        print("Send connection request")
+        global rdf_graph
+        userfrom = get_user_by_id(fromUserId, rdf_graph)
+        userto = get_user_by_id(toUserId, rdf_graph)
+        if userfrom is None or userto is None:
+            raise GraphQLError(f"users with id '{fromUserId}' or '{toUserId}' do not exist.")
+
+        if toUserId in userfrom["connections"] or toUserId in userto["connections"]:
+            raise GraphQLError(f"User with id '{toUserId}' is already connected.")
+
+
+        connection = make_connection_request(fromUserId, toUserId, rdf_graph)
+
+        print("connection: ", connection)
+        
+        return connection
+
+    @mutation.field("updateConnectionRequest")
+    def resolve_update_connection_request(_, info, connectionId, status):
+        print("Update connection request")
+        global rdf_graph
+        connection = update_connection_request(connectionId, status, rdf_graph)
+        print("connection: ", connection)
+        return connection
+
+    @mutation.field("removeConnection")
+    def resolve_remove_connection(_, info, connectionId):
+        print("Remove connection")
+        global rdf_graph
+        delete_connection(connectionId, rdf_graph)
+        return
 
 
     # Resolver for `createuser` mutation
@@ -265,7 +300,7 @@ def create_app(test_config=None):
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
     def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, lookingForWork=None, skills=None, dateOfBirth=None, educations=None, experiences=None):
-        user, graph = update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, rdf_graph)
+        user = update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, rdf_graph)
         
         return user
 

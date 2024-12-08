@@ -60,6 +60,20 @@ ex:User3 a ex:User ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .
 
+ex:User4 a ex:User ;
+    ex:id "U004" ;
+    ex:firstName "Samantha" ;
+    ex:name "Smith" ;
+    ex:email "samantha.smith@example.com" ;
+    ex:dateOfBirth "1985-05-15"^^xsd:date ;
+    ex:gender "Female" ;
+    ex:lookingForWork "true"^^xsd:boolean ;
+    ex:skills "Python", "Django", "SQL" ;
+    ex:location ex:Location2 ;
+    ex:educations ex:Education3 ;
+    ex:experiences ex:Experience2.
+
+
 ### Example Educations
 ex:Education1 a ex:Education ;
     ex:institution "Harvard University" ;
@@ -139,7 +153,6 @@ ex:Vacancy3 a ex:Vacancy ;
     ex:requiredSkills "Machine Learning", "Python", "TensorFlow" ;
     ex:startDate "2024-06-01"^^xsd:date ;
     ex:endDate "2025-05-31"^^xsd:date .
-
 
 ### Example User Connections
 ex:UserConnection1 a ex:UserConnection ;
