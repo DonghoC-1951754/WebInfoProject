@@ -152,40 +152,6 @@ export const GET_USER_CONNECTIONS = gql`
   }
 `;
 
-export const GET_SENT_CONNECTIONS = gql`
-  query GetSentConnections($userId: ID!) {
-    sentConnectionsByUser(userId: $userId) {
-      id
-      fromUser {
-        id
-        name
-      }
-      toUser {
-        id
-        name
-      }
-      status
-    }
-  }
-`;
-
-export const GET_RECEIVED_CONNECTIONS = gql`
-  query GetReceivedConnections($userId: ID!) {
-    receivedConnectionsByUser(userId: $userId) {
-      id
-      fromUser {
-        id
-        name
-      }
-      toUser {
-        id
-        name
-      }
-      status
-    }
-  }
-`;
-
 export const GET_VACANCIES = gql`
   query GetVacancies {
     vacancies {

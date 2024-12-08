@@ -7,9 +7,7 @@ export const CREATE_USER = gql`
     $email: String!,
     $dateOfBirth: Date!,
     $location: LocationInput!,
-    $gender: String!
-    $lookingForWork: Boolean!
-    $skills: [String]
+    $gender: String!,
   ) {
     createUser(
       firstName: $firstName,
@@ -17,9 +15,7 @@ export const CREATE_USER = gql`
       email: $email,
       dateOfBirth: $dateOfBirth,
       location: $location,
-      gender: $gender,
-      lookingForWork: $lookingForWork!
-      skills: $skills
+      gender: $gender
     ) {
       id
       firstName
@@ -27,8 +23,6 @@ export const CREATE_USER = gql`
       email
       gender
       dateOfBirth
-      lookingForWork
-      skills
       location {
         country
         city
@@ -72,7 +66,7 @@ export const UPDATE_USER = gql`
     $name: String,
     $location: LocationInput,
     $gender: String,
-    $lookingForWork: Boolean!
+    $lookingForWork: Boolean,
     $skills: [String]
   ) {
     updateUser(
@@ -81,7 +75,7 @@ export const UPDATE_USER = gql`
       name: $name,
       location: $location,
       gender: $gender,
-      lookingForWork: $lookingForWork!
+      lookingForWork: $lookingForWork,
       skills: $skills
     ) {
       id
@@ -90,6 +84,30 @@ export const UPDATE_USER = gql`
       gender
       lookingForWork
       skills
+      location {
+        country
+        city
+        cityCode
+        street
+        houseNumber
+      }
+    }
+  }
+`;
+
+export const UPDATE_COMPANY = gql`
+  mutation UpdateCompany(
+    $id: ID!,
+    $name: String,
+    $location: LocationInput
+  ) {
+    updateCompany(
+      id: $id,
+      name: $name,
+      location: $location,
+    ) {
+      id
+      name
       location {
         country
         city
@@ -188,14 +206,8 @@ export const SEND_CONNECTION_REQUEST = gql`
   mutation SendConnectionRequest($fromUserId: ID!, $toUserId: ID!) {
     sendConnectionRequest(fromUserId: $fromUserId, toUserId: $toUserId) {
       id
-      fromUser {
-        id
-        name
-      }
-      toUser {
-        id
-        name
-      }
+      fromUserId
+      toUserId
       status
     }
   }
@@ -203,17 +215,11 @@ export const SEND_CONNECTION_REQUEST = gql`
 
 
 export const UPDATE_CONNECTION_REQUEST = gql`
-  mutation UpdateConnectionRequest($connectionId: ID!) {
-    updateConnectionRequest(connectionId: $connectionId) {
+  mutation UpdateConnectionRequest($connectionId: ID!, $status: String!) {
+    updateConnectionRequest(connectionId: $connectionId, status: $status) {
       id
-      fromUser {
-        id
-        name
-      }
-      toUser {
-        id
-        name
-      }
+      fromUserId
+      toUserId
       status
     }
   }
@@ -221,22 +227,10 @@ export const UPDATE_CONNECTION_REQUEST = gql`
 
 export const REMOVE_CONNECTION = gql`
   mutation RemoveConnection($connectionId: ID!) {
-    removeConnection(connectionId: $connectionId) {
-      id
-      fromUser {
-        id
-        name
-      }
-      toUser {
-        id
-        name
-      }
-      status
-    }
+    removeConnection(connectionId: $connectionId) 
   }
 `;
 
-// Create a new Vacancy
 export const CREATE_VACANCY = gql`
   mutation CreateVacancy($vacancy: VacancyInput!) {
     createVacancy(vacancy: $vacancy) {
@@ -260,7 +254,6 @@ export const CREATE_VACANCY = gql`
   }
 `;
 
-// Update an existing Vacancy
 export const UPDATE_VACANCY = gql`
   mutation UpdateVacancy($id: ID!, $vacancy: VacancyInput!) {
     updateVacancy(id: $id, vacancy: $vacancy) {

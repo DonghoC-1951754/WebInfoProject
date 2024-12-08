@@ -11,14 +11,15 @@ type User {
     lookingForWork: Boolean!
     educations: [Education!]
     experiences: [Experience!]
-    connections: [UserConnection!]
+    connections: [UserConnection]
     skills: [String]
 }
+
 type UserConnection{
     id: ID!
-    fromUserId: ID!
-    toUserId: ID!
-    status: String! #pending, accepted, rejected
+    fromUser: User!
+    toUser: User!
+    status: String!
 }
 
 type Company {
@@ -112,9 +113,7 @@ type Query {
 
     activeVacancies(currentDate: Date!): [Vacancy]
     #possible filtering with the type string
-    connections(userId: ID!, type: String): [UserConnection!]
-    sentConnectionsByUser(userId: ID!): [UserConnection!]
-    receivedConnectionsByUser(userId: ID!): [UserConnection!]
+    connections(userId: ID!, type: String!): [UserConnection!]
 
     vacancies: [Vacancy]
     vacancy(id: ID!): Vacancy
@@ -148,10 +147,16 @@ type Mutation {
         firstName: String,
         name: String,
         location: LocationInput,
-        gender: String
-        lookingForWork: $lookingForWork!
-      skills: $skills
+        gender: String,
+        lookingForWork: Boolean,
+        skills: [String]
     ): User
+
+    updateCompany(
+        id: ID!,
+        name: String,
+        location: LocationInput,
+    ): Company
 
     #education mutations
     addUserEducation(userId: ID!, education: EducationInput!): Education
@@ -166,7 +171,7 @@ type Mutation {
      # Connection mutations
     sendConnectionRequest(fromUserId: ID!, toUserId: ID!): UserConnection
     updateConnectionRequest(connectionId: ID!, status: String!): UserConnection
-    removeConnection(connectionId: ID!): UserConnection
+    removeConnection(connectionId: ID!): String
 
     createVacancy(vacancy: VacancyInput!): Vacancy
     updateVacancy(id: ID!, vacancy: VacancyInput!): Vacancy
