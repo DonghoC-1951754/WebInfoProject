@@ -164,13 +164,6 @@ export const GET_VACANCIES = gql`
       requiredSkills
       startDate
       endDate
-      location {
-        country
-        city
-        cityCode
-        street
-        houseNumber
-      }
     }
   }
 `;
@@ -187,13 +180,6 @@ export const GET_VACANCY_BY_ID = gql`
       requiredSkills
       startDate
       endDate
-      location {
-        country
-        city
-        cityCode
-        street
-        houseNumber
-      }
     }
   }
 `;
@@ -210,13 +196,6 @@ export const GET_MATCHING_VACANCIES = gql`
       requiredSkills
       startDate
       endDate
-      location {
-        country
-        city
-        cityCode
-        street
-        houseNumber
-      }
     }
   }
 `;

@@ -243,13 +243,6 @@ export const CREATE_VACANCY = gql`
       requiredSkills
       startDate
       endDate
-      location {
-        country
-        city
-        cityCode
-        street
-        houseNumber
-      }
     }
   }
 `;
@@ -266,13 +259,6 @@ export const UPDATE_VACANCY = gql`
       requiredSkills
       startDate
       endDate
-      location {
-        country
-        city
-        cityCode
-        street
-        houseNumber
-      }
     }
   }
 `;

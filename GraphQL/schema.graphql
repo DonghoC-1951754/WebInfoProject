@@ -62,7 +62,6 @@ type Vacancy {
     requiredSkills: [String]
     startDate: Date!
     endDate: Date
-    location: Location!
 }
 
 
