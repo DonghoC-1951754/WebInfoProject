@@ -6,7 +6,7 @@ Content-Type: application/json
   "variables": {
     "firstName": "Test",
     "name": "User",
-    "email": "test.user2@example.com",
+    "email": "test.user10@example.com",
     "dateOfBirth": "1990-01-01",
     "location": {
       "country": "USA",
