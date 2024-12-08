@@ -19,6 +19,7 @@ export const GET_USERS = gql`
   }
 `;
 
+
 export const GET_USER_BY_ID = gql`
   query GetUserById($id: ID!) {
     user(id: $id) {
@@ -160,6 +161,13 @@ export const GET_VACANCIES = gql`
       company {
         id
         name
+        Location {
+          country
+          city
+          cityCode
+          street
+          houseNumber
+        }
       }
       requiredSkills
       startDate

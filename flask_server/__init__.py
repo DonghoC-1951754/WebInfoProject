@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, check_id, add_new_user, add_new_company, get_all_vacancies
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies
 from functools import wraps
 from urllib.parse import urlencode
 from graphql import GraphQLError
@@ -125,6 +125,7 @@ def create_app(test_config=None):
         {"id": "5", "jobTitle": "UX Designer", "company": {"name": "Apple", "location": {"country": "USA", "city": "San Francisco", "cityCode": 94101}}, "requiredSkills": ["UI/UX", "Wireframing", "Prototyping"], "startDate": datetime.date(2022, 1, 1), "endDate": datetime.date(2024, 11, 29)},
         {"id": "6", "jobTitle": "Sales Manager", "company": {"name": "Tesla", "location": {"country": "USA", "city": "Palo Alto", "cityCode": 94301}}, "requiredSkills": ["Sales", "Negotiation", "CRM"], "startDate": datetime.date(2022, 2, 1), "endDate": datetime.date(2024, 12, 1)},
     ]
+    
 
     # Resolver for `users` query
     @query.field("users")
@@ -158,7 +159,56 @@ def create_app(test_config=None):
 
     @query.field("activeVacancies")
     def resolve_active_vacancies(_, info, currentDate):
-        return get_all_vacancies(rdf_graph)
+        return get_active_vacancies(rdf_graph)
+
+    # @query.field("getUserConnections")
+    # def resolve_user_connections(_, info, id):
+    #     user = get_user_by_id(id, rdf_graph)
+    #     return user["connections"]
+    
+    # @query.field("getVacancyById")
+    # def resolve_vacancy_by_id(_, info, id):
+    #     return next((p for p in vacancies_test_data if p["id"] == id), None)
+    
+    # @query.field("getUserMatchingVacancies")
+    # def resolve_user_matching_vacancies(_, info, id):
+    #     user = get_user_by_id(id, rdf_graph)
+    #     user_skills = user["skills"]
+    #     user_cityCode = user["location"]["cityCode"]
+    #     matching_vacancies = []
+    #     vacancies = get_all_vacancies(rdf_graph)
+    #     #if vacancy city code matches user OR a skill in the users skills matches a required skill add it in
+    #     for vacancy in vacancies:
+    #         if vacancy["company"]["location"]["cityCode"] == user_cityCode:
+    #             matching_vacancies.append(vacancy)
+    #         else:
+    #             for skill in user_skills:
+    #                 if skill in vacancy["requiredSkills"]:
+    #                     matching_vacancies.append(vacancy)
+    #                     break
+    #     return matching_vacancies
+    
+    #TODOsparql jeroen
+    # @query.field("GetVacancysMatchedUsers")
+    # def resolve_vacancy_matched_users(_, info, id):
+    #     vacancy = next((p for p in vacancies_test_data if p["id"] == id), None)
+    #     vacancy_skills = vacancy["requiredSkills"]
+    #     vacancy_cityCode = vacancy["company"]["location"]["cityCode"]
+    #     matched_users = []
+    #     for user in users_test_data:
+    #         if user["location"]["cityCode"] == vacancy_cityCode:
+    #             matched_users.append(user)
+    #         else:
+    #             for skill in vacancy_skills:
+    #                 if skill in user["skills"]:
+    #                     matched_users.append(user)
+    #                     break
+    #     return matched_users
+    
+    # @query.field("getCompanyVacancies")
+    # def resolve_company_vacancies(_, info, id):
+    #     #return the vacancies of the company with the given id
+    #     return next((p for p in companies_test_data if p["id"] == id), None)["vacancies"]
 
 
     # Resolver for `createuser` mutation
@@ -222,27 +272,8 @@ def create_app(test_config=None):
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
     def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, dateOfBirth=None, educations=None, experiences=None):
-        user = next((p for p in users_test_data if p["id"] == id), None)
-        if not user:
-            return None  # Return None if no user matches the ID
-
-        # Update fields if provided
-        if firstName:
-            user["firstName"] = firstName
-        if name:
-            user["name"] = name
-        if email:
-            user["email"] = email
-        if location:
-            user["location"] = location
-        if gender:
-            user["gender"] = gender
-        if dateOfBirth:
-            user["dateOfBirth"] = dateOfBirth
-        if educations is not None:
-            user["educations"] = educations
-        if experiences is not None:
-            user["experiences"] = experiences
+        user, graph = update_user(id, firstName, name, location, gender, educations, experiences, rdf_graph)
+        
         return user
 
     # Create executable schema including the Date scalar

@@ -1,4 +1,5 @@
 from rdflib import Graph, Literal, Namespace, URIRef
+import datetime
 
 
 def check_email(email, graph):
@@ -335,7 +336,7 @@ def get_all_vacancies(graph):
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-    SELECT ?vacancy ?jobTitle ?companyName ?country ?city ?cityCode ?requiredskills ?startDate ?endDate
+    SELECT ?vacancy ?jobTitle ?companyId ?companyName ?country ?city ?cityCode ?street ?houseNumber ?requiredskills ?startDate ?endDate
     WHERE {
         ?vacancy a ex:Vacancy ;
                  ex:jobTitle ?jobTitle ;
@@ -345,11 +346,14 @@ def get_all_vacancies(graph):
                  ex:endDate ?endDate .
 
         ?company ex:name ?companyName ;
+                 ex:id ?companyId ;
                  ex:location ?location .
 
         ?location ex:country ?country ;
                   ex:city ?city ;
-                  ex:cityCode ?cityCode .
+                  ex:cityCode ?cityCode ;
+                  ex:street ?street ;
+                  ex:houseNumber ?houseNumber .
     }
     """
     query_results = graph.query(query)
@@ -361,11 +365,14 @@ def get_all_vacancies(graph):
             "id": str(row["vacancy"]),
             "jobTitle": str(row["jobTitle"]),
             "company": {
+                "id": str(row["companyId"]),
                 "name": str(row["companyName"]),
                 "location": {
                     "country": str(row["country"]),
                     "city": str(row["city"]),
-                    "cityCode": int(row["cityCode"])
+                    "cityCode": int(row["cityCode"]),
+                    "street": str(row["street"]),
+                    "houseNumber": str(row["houseNumber"])
                 }
             },
             "requiredSkills": row['requiredskills'],
@@ -399,3 +406,113 @@ def get_all_vacancies(graph):
         vacancy['requiredSkills'] = skills[vacancy['id']]
 
     return vacancies
+
+def get_active_vacancies(graph):
+    vacancies = get_all_vacancies(graph)
+
+    active_vacancies = []
+
+    for vacancy in vacancies:
+        if vacancy['endDate'] == None or vacancy['endDate'] > datetime.datetime.now().date():
+            active_vacancies.append(vacancy)
+
+    return active_vacancies
+
+def update_user(id, firstName, name, location, gender, educations, experiences, graph):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    """
+    delete = "DELETE {"
+
+    if firstName:
+        delete += "?user ex:firstName ?firstname ."
+    if name:
+        delete += "?user ex:name ?name ."
+    if gender:
+        delete += "?user ex:gender ?gender ."
+
+    delete += "}"
+    
+    insert = """
+    INSERT {"""
+
+    if firstName:
+        insert += f"?user ex:firstName \"{firstName}\" ."
+    if name:
+        insert += f"?user ex:name \"{name}\" ."
+    if gender:
+        insert += f"?user ex:gender \"{gender}\" ."
+
+    insert += "}"
+    where = f"""
+    WHERE {{
+        ?user a ex:User ;
+              ex:id "{id}" .
+    }}
+    """
+
+    delete = query + delete + where
+
+    print(delete)   
+
+    graph.update(delete)
+
+    insert = query + insert + where
+
+    print(insert)
+
+    graph.update(insert)
+
+    user = {}
+
+    user["id"] = id
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber
+    WHERE {{
+      ?user a ex:User ;
+            ex:id "{id}" ;
+            ex:firstName ?firstName ;
+            ex:name ?name ;
+            ex:email ?email ;
+            ex:dateOfBirth ?dateOfBirth ;
+            ex:gender ?gender ;
+            ex:location ?location .
+
+      ?location ex:country ?country ;
+                ex:city ?city ;
+                ex:cityCode ?cityCode ;
+                ex:street ?street;
+                ex:houseNumber ?houseNumber .
+    }}
+    """
+
+    query_results = graph.query(query)
+
+    for row in query_results:
+        user = {
+            "id": id,
+            "firstName": str(row["firstName"]),
+            "name": str(row["name"]),
+            "email": str(row["email"]),
+            "dateOfBirth": row["dateOfBirth"].toPython(),
+            "gender" : str(row["gender"]),
+            "location": {
+                "country": str(row["country"]),
+                "city": str(row["city"]),
+                "cityCode": str(row["cityCode"]),
+                "street": str(row["street"]),
+                "houseNumber": str(row["houseNumber"])
+            }
+        }
+
+    print(user)
+    
+    return user, graph
+
+
