@@ -11,11 +11,11 @@ Content-Type: application/json
         "lookingForWork": false,
         "skills": [],
         "location": {
-            "country": "Lebron James",
-            "city": "yucatan",
-            "cityCode": "Tilted towers",
-            "street": "",
-            "houseNumber": "Turkije"
+            "country": "Netherlands",
+            "city": "Amsterdam",
+            "cityCode": "1011",
+            "street": "Nieuwezijds Voorburgwal",
+            "houseNumber": "147"
         }
     }
 }

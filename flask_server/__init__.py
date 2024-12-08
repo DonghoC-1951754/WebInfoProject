@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience, get_all_users
 from functools import wraps
 from urllib.parse import urlencode
 from graphql import GraphQLError
@@ -181,21 +181,24 @@ def create_app(test_config=None):
     
     # # gets the users that match the given vacancy
     #TODOsparql jeroen
-    # @query.field("matchedUsers")
-    # def resolve_vacancy_matched_users(_, info, id):
-    #     vacancy = next((p for p in vacancies_test_data if p["id"] == id), None)
-    #     vacancy_skills = vacancy["requiredSkills"]
-    #     vacancy_cityCode = vacancy["company"]["location"]["cityCode"]
-    #     matched_users = []
-    #     for user in users_test_data:
-    #         if user["location"]["cityCode"] == vacancy_cityCode:
-    #             matched_users.append(user)
-    #         else:
-    #             for skill in vacancy_skills:
-    #                 if skill in user["skills"]:
-    #                     matched_users.append(user)
-    #                     break
-    #     return matched_users
+    @query.field("matchedUsers")
+    def resolve_vacancy_matched_users(_, info, vacancyId):
+        vacancies = get_all_vacancies(rdf_graph)
+        vacancy = next((p for p in vacancies if p["id"] == vacancyId), None)
+        vacancy_skills = vacancy["requiredSkills"]
+        vacancy_cityCode = vacancy["company"]["location"]["cityCode"]
+        matched_users = []
+        users = get_all_users(rdf_graph)
+        for user in users:
+            if user["lookingForWork"]:
+                if user["location"]["cityCode"] == vacancy_cityCode:
+                    matched_users.append(user)
+                else:
+                    for skill in vacancy_skills:
+                        if skill in user["skills"]:
+                            matched_users.append(user)
+                            break
+        return matched_users
     
     # # gets the vacancies of the company with the given id
     # @query.field("companyVacancies")
@@ -205,7 +208,6 @@ def create_app(test_config=None):
 
     @mutation.field("addUserExperience")
     def resolve_add_user_experience(_, info, userId, companyId, jobTitle, startDate, endDate, description):
-        print("addUserExperience")
         global rdf_graph
         user = get_user_by_id(userId, rdf_graph)
         if user is None:
@@ -226,7 +228,6 @@ def create_app(test_config=None):
             raise GraphQLError(f"User with id '{userID}' is not allowed to send connection request from user with id '{fromUserId}'.")
         ############################################
 
-        print("Send connection request")
         global rdf_graph
         userfrom = get_user_by_id(fromUserId, rdf_graph)
         userto = get_user_by_id(toUserId, rdf_graph)
@@ -238,8 +239,6 @@ def create_app(test_config=None):
 
 
         connection = make_connection_request(fromUserId, toUserId, rdf_graph)
-
-        print("connection: ", connection)
         
         return connection
 
@@ -249,7 +248,6 @@ def create_app(test_config=None):
         current_request = info.context.get('request')
         check_jwt(current_request)
 
-        print("Update connection request")
         global rdf_graph
 
         userID = info.context.get('user_id')
@@ -261,7 +259,6 @@ def create_app(test_config=None):
         ############################################
 
         connection = update_connection_request(connectionId, status, rdf_graph)
-        print("connection: ", connection)
         return connection
 
     @mutation.field("removeConnection")
@@ -270,7 +267,6 @@ def create_app(test_config=None):
         current_request = info.context.get('request')
         check_jwt(current_request)
 
-        print("Remove connection")
         global rdf_graph
 
         userID = info.context.get('user_id')
@@ -312,10 +308,7 @@ def create_app(test_config=None):
             "educations": [],
             "experiences": []
         }
-        print("New user")
-        print(f"State of rdf_graph before adding new user: {rdf_graph}")
         new_user = add_new_user(new_user, rdf_graph)
-        print(f"State of rdf_graph after adding new user: {rdf_graph}")
         return new_user
     
     @mutation.field("createCompany")
@@ -332,7 +325,6 @@ def create_app(test_config=None):
         
         if (compID is None):
             compID = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
-        print("CompId: ", compID)
         new_company = {
             "id": compID,
             "name": name,
@@ -445,7 +437,6 @@ def create_app(test_config=None):
         if user_id and user_id.startswith("auth0|"):
             user_id = user_id.split("|")[1]
 
-        print("User ID: ", user_id)
         user_by_id = get_user_by_id(user_id, rdf_graph)
         if user_by_id:
             return redirect(f'http://localhost:3000/?token={id_token}&userID={user_id}')

@@ -42,7 +42,7 @@ ex:User2 a ex:User ;
     ex:dateOfBirth "1990-02-20"^^xsd:date ;
     ex:gender "Female" ;
     ex:lookingForWork "false"^^xsd:boolean ;
-    ex:skills "fortnite";
+    ex:skills "c++";
     ex:location ex:Location2 ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .
@@ -97,14 +97,14 @@ ex:Education3 a ex:Education ;
 ex:Company1 a ex:Company ;
     ex:id "C001" ;
     ex:name "TechCorp" ;
-    ex:email "joden@outlook.be" ;
+    ex:email "Techcorp@info.org" ;
     ex:location ex:Location1 ;
     ex:vacancies ex:Vacancy1, ex:Vacancy2 .
 
 ex:Company2 a ex:Company ;
     ex:id "C002" ;
     ex:name "Innovatech" ;
-    ex:email "yahoo@seppekimps.be" ;
+    ex:email "Innovatech@yahoo.com" ;
     ex:location ex:Location2 ;
     ex:vacancies ex:Vacancy3 .
 

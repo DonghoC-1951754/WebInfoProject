@@ -154,8 +154,6 @@ def get_user_by_id(id, graph):
     }}
     """
 
-    print(query)
-
     # get the education of the user
     queryEducation = f"""
     PREFIX ex: <http://example.com/schema#>
@@ -203,7 +201,6 @@ def get_user_by_id(id, graph):
 
     query_results = graph.query(query)
     query_results_education = graph.query(queryEducation)
-    print(queryExperience)
     query_results_experience = graph.query(queryExperience)
     query_results_skills = graph.query(query_skills)
     
@@ -300,7 +297,6 @@ def get_user_by_id(id, graph):
     query_results_connections = graph.query(queryConnections)
 
     for row in query_results_connections:
-        print("in loop")
         connection = {
             "id": str(row["connectionId"]),
             "fromUser": {
@@ -314,8 +310,6 @@ def get_user_by_id(id, graph):
             "status": str(row["status"])
         }
         user["connections"].append(connection)
-
-    # print("user", user)
 
     return user
 
@@ -507,8 +501,6 @@ def get_active_vacancies(graph):
 
 def update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, graph):
 
-    print(location)
-
     query = f"""
     PREFIX ex: <http://example.com/schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -568,13 +560,9 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
 
     delete = query + delete
 
-    print(delete)   
-
     graph.update(delete)
 
     insert = query + insert + where
-
-    print(insert)
 
     graph.update(insert)
 
@@ -613,7 +601,6 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
         query += f"""
         }}
         """
-        print(query)
         graph.update(query)
 
         query = f"""
@@ -640,7 +627,6 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
         }}
 
         """
-        print(query)
         graph.update(query)
 
 
@@ -711,8 +697,6 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
         }
 
     user["skills"] = qskills
-
-    print(user)
     
     return user
 
@@ -740,8 +724,6 @@ def make_connection_request(fromUserId, toUserId, graph):
     }}
     """
 
-    print(query)
-
     connection = {
         "id": connectionid,
         "fromUser": {
@@ -754,33 +736,6 @@ def make_connection_request(fromUserId, toUserId, graph):
     }   
 
     graph.update(query)
-
-    # get all connections and print
-    query = f"""
-    PREFIX ex: <http://example.com/schema#>
-    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
-    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
-
-    SELECT ?connectionId ?userFromId ?userFromName ?userToId ?userToName ?status
-    WHERE {{
-        ?connectionfrom a ex:UserConnection ;
-                    ex:id ?connectionId ;
-                    ex:fromUser ?userfrom ;
-                    ex:toUser ?userto ;
-                    ex:status ?status .
-        ?userfrom a ex:User ;
-                ex:id ?userFromId ;
-                ex:firstName ?userFromName .
-        ?userto a ex:User ;
-                ex:id ?userToId ;
-                ex:firstName ?userToName .
-    }}
-    """
-
-    query_results_connections = graph.query(query)
-
-    for row in query_results_connections:
-        print("connection from ", str(row['userFromName']), "to", str(row['userToName']))
 
     return connection
 
@@ -893,7 +848,6 @@ def make_user_experience(userId, companyId, jobTitle, startDate, endDate, descri
                 ex:id "{userId}" .
     }}
     """
-    print(query)
     graph.update(query)
 
     query = f"""
@@ -933,3 +887,68 @@ def make_user_experience(userId, companyId, jobTitle, startDate, endDate, descri
         userexp["endDate"] = endDate
 
     return userexp
+
+def get_all_users(graph):
+    query = """
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?id ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?lookingForWork
+    WHERE {
+        ?user a ex:User ;
+                ex:id ?id ;
+                ex:firstName ?firstName ;
+                ex:name ?name ;
+                ex:email ?email ;
+                ex:dateOfBirth ?dateOfBirth ;
+                ex:lookingForWork ?lookingForWork ;
+                ex:location ?location .
+
+        ?location ex:country ?country ;
+                  ex:city ?city ;
+                  ex:cityCode ?cityCode ;
+                  ex:street ?street ;
+                  ex:houseNumber ?houseNumber .
+    }
+    """
+
+    query_results = graph.query(query)
+
+    users = []
+
+    for row in query_results:
+        skills_query = f"""
+        PREFIX ex: <http://example.com/schema>
+        SELECT ?skills
+        WHERE {{
+            ?user a ex:User ;
+                    ex:id "{row["id"]}" ;
+                    ex:skills ?skills .
+        }}
+        """
+
+        skills = graph.query(skills_query)
+
+        qskills = []
+
+        for skill in skills:
+            qskills.append(str(skill["skills"]))
+
+        user = {
+            "id": str(row["id"]),
+            "firstName": str(row["firstName"]),
+            "name": str(row["name"]),
+            "email": str(row["email"]),
+            "dateOfBirth": row["dateOfBirth"].toPython(),
+            "location": {
+                "country": str(row["country"]),
+                "city": str(row["city"]),
+                "cityCode": str(row["cityCode"]),
+                "street": str(row["street"]),
+                "houseNumber": str(row["houseNumber"])
+            },
+            "lookingForWork": bool(row["lookingForWork"]),
+            "skills": qskills
+        }
+        users.append(user)
+
+    return users
