@@ -25,6 +25,7 @@ const UserProfile = () => {
         cityCode: undefined,
         street: undefined,
         houseNumber: undefined,
+        lookingForWork: undefined,
     });
     const [updateUser] = useMutation(UPDATE_USER); // Use the hook here
 
@@ -156,8 +157,14 @@ const UserProfile = () => {
                             </button>
                         )}
                     </li>
+
+                    <li>
+                        <strong>looking for work? </strong> {user["lookingForWork"]}
+                    </li>
                 </ul>
             </section>
+
+
 
             {/* Location Details */}
             <section className="mb-8">

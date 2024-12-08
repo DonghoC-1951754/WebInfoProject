@@ -506,6 +506,8 @@ def get_active_vacancies(graph):
 
 def update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, graph):
 
+    print(location)
+
     query = f"""
     PREFIX ex: <http://example.com/schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -574,6 +576,72 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     print(insert)
 
     graph.update(insert)
+
+    if location:
+        query = f"""
+        PREFIX ex: <http://example.com/schema#>
+        PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+        DELETE {{"""
+        if location["country"]:
+            query += "?location ex:country ?country ."
+        if location["city"]:
+            query += "?location ex:city ?city ."
+        if location["cityCode"]:
+            query += "?location ex:cityCode ?cityCode ."
+        if location["street"]:
+            query += "?location ex:street ?street ."
+        if location["houseNumber"]:
+            query += "?location ex:houseNumber ?houseNumber ."
+        
+        query += f"""}}WHERE {{
+            ?user a ex:User ;
+                    ex:id "{id}" ;
+                    ex:location ?location ."""
+        if location["country"]:
+            query += "?location ex:country ?country ."
+        if location["city"]:
+            query += "?location ex:city ?city ."
+        if location["cityCode"]:
+            query += "?location ex:cityCode ?cityCode ."
+        if location["street"]:
+            query += "?location ex:street ?street ."
+        if location["houseNumber"]:
+            query += "?location ex:houseNumber ?houseNumber ."
+
+        query += f"""
+        }}
+        """
+        print(query)
+        graph.update(query)
+
+        query = f"""
+        PREFIX ex: <http://example.com/schema#>
+
+        INSERT {{"""
+        if location["country"]:
+            query += "?location ex:country \"" + location["country"] + "\" ."
+        if location["city"]:
+            query += "?location ex:city \"" + location["city"] + "\" ."
+        if location["cityCode"]:
+            query += "?location ex:cityCode \"" + location["cityCode"] + "\" ."
+        if location["street"]:
+            query += "?location ex:street \"" + location["street"] + "\" ."
+        if location["houseNumber"]:
+            query += "?location ex:houseNumber \"" + location["houseNumber"] + "\" ."
+        query += f"""}}
+        WHERE {{
+            ?user a ex:User ;
+                    ex:id "{id}" .
+            OPTIONAL {{
+                ?user ex:location ?location .
+            }}
+        }}
+
+        """
+        print(query)
+        graph.update(query)
+
 
     user = {}
 
