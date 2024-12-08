@@ -345,7 +345,9 @@ def create_app(test_config=None):
             return jsonify({"error": "Invalid query"}), 400
 
         # Return the results as JSON
+        print("Rows: ", rows)
         json = jsonify(rows)
+        print("JSON: ", json)
         return json, 200
 
     @app.route("/graphql", methods=["POST"])

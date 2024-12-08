@@ -505,6 +505,29 @@ def get_active_vacancies(graph):
     return active_vacancies
 
 def update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, graph):
+    # check if user firstname exists
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?firstName
+    WHERE {{
+        ?user a ex:User ;
+                ex:id "{id}" ;
+                ex:firstName ?firstName .
+    }}
+    """
+
+    print(query)
+
+    query_results = graph.query(query)
+
+    if len(query_results) == 0:
+        print("User not found")
+    else:
+        for row in query_results:
+            print("User found", str(row["firstName"]))
+
+
     query = f"""
     PREFIX ex: <http://example.com/schema#>
     PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -514,14 +537,29 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     delete = "DELETE {"
 
     if firstName:
-        delete += "?user ex:firstName ?firstname ."
+        delete += "?user ex:firstName ?firstName ."
     if name:
         delete += "?user ex:name ?name ."
     if gender:
         delete += "?user ex:gender ?gender ."
 
-    delete += "}"
-    
+    delete += f"""}}
+    WHERE {{
+        ?user a ex:User ;"""
+    if firstName:
+        delete += f"""
+              ex:firstName ?firstName ;"""
+    if name:
+        delete += f"""
+              ex:name ?name ;"""
+    if gender:
+        delete += f"""
+              ex:gender ?gender ;"""
+    delete += f"""
+              ex:id "{id}" .
+    }}
+    """
+
     insert = """
     INSERT {"""
 
@@ -536,11 +574,11 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     where = f"""
     WHERE {{
         ?user a ex:User ;
-              ex:id "{id}" .
+                ex:id "{id}" . 
     }}
     """
 
-    delete = query + delete + where
+    delete = query + delete
 
     print(delete)   
 
