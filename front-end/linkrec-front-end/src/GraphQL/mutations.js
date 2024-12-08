@@ -197,18 +197,18 @@ export const REMOVE_CONNECTION = gql`
 `;
 
 export const CREATE_VACANCY = gql`
-  mutation CreateVacancy($vacancy: VacancyInput!) {
-    createVacancy(vacancy: $vacancy) {
-      id
-      jobTitle
-      company {
-        id
-        name
-      }
-      requiredSkills
-      startDate
-      endDate
-    }
+  mutation CreateVacancy($jobTitle: String!, $companyId: ID!, $requiredSkills: [String], $startDate: Date!, $endDate: Date) { 
+    createVacancy(jobTitle: $jobTitle, companyId: $companyId, requiredSkills: $requiredSkills, startDate: $startDate, endDate: $endDate) { 
+      id 
+      jobTitle 
+      company { 
+        id 
+        name 
+      } 
+      requiredSkills 
+      startDate 
+      endDate 
+    } 
   }
 `;
 

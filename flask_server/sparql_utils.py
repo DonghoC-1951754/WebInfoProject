@@ -941,6 +941,67 @@ def make_user_education(userId, institution, degree, fieldOfStudy, yearGraduated
 
     return education
 
+def add_new_vacancy(jobTitle, companyId, requiredSkills, startDate, endDate, graph):
+    vacancyId = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+    PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+    PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+    INSERT {{
+        ex:{vacancyId} a ex:Vacancy ;
+            ex:id "{vacancyId}" ;
+            ex:jobTitle "{jobTitle}" ;
+            ex:company ?company ;
+            ex:requiredSkills "{requiredSkills}" ;
+            ex:startDate "{startDate}"^^xsd:date ;
+            ex:endDate "{endDate}"^^xsd:date .
+    }} WHERE {{
+        ?company a ex:Company ;
+                ex:id "{companyId}" .
+    }}
+    """
+
+    graph.update(query)
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?jobTitle ?companyName ?requiredSkills ?startDate ?endDate
+    WHERE {{
+        ?company a ex:Company ;
+                ex:id "{companyId}" ;
+                ex:name ?companyName .
+        ?vacancy a ex:Vacancy ;
+                 ex:id "{vacancyId}" ;
+                 ex:jobTitle ?jobTitle ;
+                 ex:company ?company ;
+                 ex:requiredSkills ?requiredSkills ;
+                 ex:startDate ?startDate ;
+                 ex:endDate ?endDate .
+    }}
+    """
+
+    query_results = graph.query(query)
+
+    vacancy = {}
+
+    for row in query_results:
+        vacancy = {
+            "id": vacancyId,
+            "jobTitle": str(row["jobTitle"]),
+            "company": {
+                "id": companyId,
+                "name": str(row["companyName"])
+            },
+            "requiredSkills": str(row["requiredSkills"]),
+            "startDate": row["startDate"].toPython(),
+            "endDate": row["endDate"].toPython()
+        }
+
+    return vacancy
+
 def get_all_users(graph):
     query = """
     PREFIX ex: <http://example.com/schema#>

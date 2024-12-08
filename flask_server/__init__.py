@@ -16,7 +16,7 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience, get_all_users, make_user_education
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies, update_user, check_id, get_active_vacancies, make_connection_request, update_connection_request, delete_connection, make_user_experience, get_all_users, make_user_education, add_new_vacancy
 from functools import wraps
 from urllib.parse import urlencode
 from graphql import GraphQLError
@@ -297,6 +297,23 @@ def create_app(test_config=None):
         delete_connection(connectionId, rdf_graph)
         return
 
+    @mutation.field("createVacancy")
+    def resolve_create_vacancy(_, info, jobTitle, companyId, requiredSkills, startDate, endDate):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+        userID = info.context.get('user_id')
+        if (userID != companyId):
+            raise GraphQLError(f"You are not allowed to add a vacancy for company with id '{companyId}'.")
+        ############################################
+        global rdf_graph
+
+        company = get_companiy_by_id(companyId, rdf_graph)
+        if company is None:
+            raise GraphQLError(f"Company with id '{companyId}' does not exist.")
+
+
+        return add_new_vacancy(jobTitle, companyId, requiredSkills, startDate, endDate, rdf_graph)
 
     # Resolver for `createuser` mutation
     @mutation.field("createUser")

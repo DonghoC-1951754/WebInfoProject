@@ -172,7 +172,14 @@ type Mutation {
     updateConnectionRequest(connectionId: ID!, status: String!): UserConnection
     removeConnection(connectionId: ID!): String
 
-    createVacancy(vacancy: VacancyInput!): Vacancy
+    createVacancy(
+        jobTitle: String!,
+        companyId: ID!,
+        requiredSkills: [String],
+        startDate: Date!,
+        endDate: Date
+    ): Vacancy
+    
     updateVacancy(id: ID!, vacancy: VacancyInput!): Vacancy
     deleteVacancy(id: ID!): String
 }

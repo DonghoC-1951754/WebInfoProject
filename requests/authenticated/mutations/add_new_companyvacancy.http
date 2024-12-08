@@ -1,0 +1,14 @@
+POST http://127.0.0.1:5000/graphql HTTP/1.1
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjF3Y0FhM1lGNFVHVGVuWWd5OUhuRCJ9.eyJuaWNrbmFtZSI6ImtpbXBzc2VwcGUiLCJuYW1lIjoia2ltcHNzZXBwZUBnbWFpbC5jb20iLCJwaWN0dXJlIjoiaHR0cHM6Ly9zLmdyYXZhdGFyLmNvbS9hdmF0YXIvNDE1MjQyZWJlYjYwMzI4ZWJjNjY1MTFmZTY3ODBiOTM_cz00ODAmcj1wZyZkPWh0dHBzJTNBJTJGJTJGY2RuLmF1dGgwLmNvbSUyRmF2YXRhcnMlMkZraS5wbmciLCJ1cGRhdGVkX2F0IjoiMjAyNC0xMi0wOFQyMjo1MDowOS4yOTZaIiwiZW1haWwiOiJraW1wc3NlcHBlQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly93ZWJpbmZvcHJvamVjdC5ldS5hdXRoMC5jb20vIiwiYXVkIjoicDQ0WlBvdDA0aGNjbm5rUEd0eDdFTFdFWnZ5bTB5RGkiLCJpYXQiOjE3MzM2OTgyMDksImV4cCI6MTczMzczNDIwOSwic3ViIjoiYXV0aDB8Njc1NjIyMjQyNzFkYjBhYjcxZWZjNzBkIn0.Op9ewkFQ5ojQsLKVLAiGDDAR0rXJ8io1qVL3nnMFY2_L3VdPTYfonNvmQrqNPGRiiN1D809ySRcvvQ8n_ZjWxLVlCqdaRd_Z2yE3MzGkHmRPTDU64MxVCvxp9vwG2f_WYiwzA7SZfdbzrlUXx-iuVDxKKXBZDvCKCZp5sPJUrMG8K9eO4sgZvJ5lCcec9AGmAbQDmIl4uUMG1kwwpttVh_xTMRQWsHAlrrL9dMvHl1TSPJ1ve6rIOpB215PLNkxy_wnX5QUpza8CD1pnu-vgP41_YBbmmvZyPZd-_akq0u8PITyTvRrBedyiv2r4mfXIvuiJVVGOElIPrgx62RhwBA
+Content-Type: application/json
+
+{
+  "query": "mutation CreateVacancy($jobTitle: String!, $companyId: ID!, $requiredSkills: [String], $startDate: Date!, $endDate: Date) { createVacancy(jobTitle: $jobTitle, companyId: $companyId, requiredSkills: $requiredSkills, startDate: $startDate, endDate: $endDate) { id jobTitle company { id name } requiredSkills startDate endDate } }",
+  "variables": {
+    "jobTitle": "Data analyst", 
+    "companyId": "C001", 
+    "requiredSkills": ["data analysis","python", "R"], 
+    "startDate": "2019-04-01", 
+    "endDate": "2025-01-01"
+  }
+}
