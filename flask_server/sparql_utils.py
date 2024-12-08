@@ -37,6 +37,43 @@ def check_email(email, graph):
 
     return len(query_results) == 0
 
+
+def check_id(id, graph):
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?id
+    WHERE {{
+
+      ?user a ex:User ;
+            ex:id ?id .
+
+      FILTER (?id = "{id}")
+    }}
+    """
+
+    query_results = graph.query(query)
+
+    if len(query_results) > 0:
+        return False
+    
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?id
+    WHERE {{
+
+      ?company a ex:Company ;
+            ex:id ?id .
+
+      FILTER (?id = "{id}")
+    }}
+    """
+
+    query_results = graph.query(query)
+
+    return len(query_results) == 0
+
 def add_new_user(user, graph):
     # Create a new user node
     query = f"""

@@ -1,0 +1,18 @@
+POST http://127.0.0.1:5000/graphql HTTP/1.1
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjF3Y0FhM1lGNFVHVGVuWWd5OUhuRCJ9.eyJuaWNrbmFtZSI6ImRvbmdoby5hbHRlcm5hdGl2ZSIsIm5hbWUiOiJkb25naG8uYWx0ZXJuYXRpdmVAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzk5ZDViNjE5NzljNTEyNWFkNDNkYzgwMTRmZWQwY2Y1P3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGZG8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjQtMTItMDhUMDE6Mjg6NDguOTIxWiIsImVtYWlsIjoiZG9uZ2hvLmFsdGVybmF0aXZlQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly93ZWJpbmZvcHJvamVjdC5ldS5hdXRoMC5jb20vIiwiYXVkIjoicDQ0WlBvdDA0aGNjbm5rUEd0eDdFTFdFWnZ5bTB5RGkiLCJpYXQiOjE3MzM2MjEzMjgsImV4cCI6MTczMzY1NzMyOCwic3ViIjoiYXV0aDB8Njc1MDc0MDA0MmExNTEyOTNiZTM3ZmJhIn0.JLhRFqkJ8Io1uiop6SMFOiPRhhDFUYkWc__Kz0QQEQyFlti8-chZD95EGfmur16N4mf_6Jk4wp_Uq_utLfVL31T25P4R7urx2B0IGR8Cm9qH-0h5H6PR59U9ICtL2Fg9MS9V3Eiot0_gVNRPwQwGcMYOTT7Wr_SAGRVgsK5NrWc_oyM4vhOk4H24gUnJwiDpM6iIzDscUGP5ZMJQhAKUAepZgtgg-tbREwSmT8nCWWlWh9_vOyfuYQ0Y2bZ5clI5ElbxtkB08_2_cn9zfyDJ9D5hexFCs_xCAzTfFwTJfF1v-lv24xQREhf-9BnydcDsQqwcuBHi0_phB9IPiZV3YA
+Content-Type: application/json
+
+{
+  "query": "mutation createCompany($name: String!, $email: String!, $location: LocationInput!) { createCompany(name: $name, email: $email, location: $location) { id name email location { country city cityCode street houseNumber } } }",
+  "variables": {
+    "name": "Tech Innovators",
+    "email": "info@techinnovators.com",
+    "location": {
+      "country": "USA",
+      "city": "San Francisco",
+      "cityCode": "SF",
+      "street": "Market Street",
+      "houseNumber": "123"
+    }
+  }
+}

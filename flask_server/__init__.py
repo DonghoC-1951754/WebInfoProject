@@ -16,9 +16,10 @@ from jwt.exceptions import InvalidTokenError
 from jwt import PyJWKClient
 import random
 import string
-from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, add_new_user, add_new_company, get_all_vacancies
+from flask_server.sparql_utils import get_companiy_by_id, get_user_by_id, check_email, check_id, add_new_user, add_new_company, get_all_vacancies
 from functools import wraps
 from urllib.parse import urlencode
+from graphql import GraphQLError
 
 oauth = OAuth()
 # load in the RDF graph
@@ -53,6 +54,29 @@ def parse_date(value):
     except ValueError:
         raise ValueError(f"Invalid date format: {value}, expected 'YYYY-MM-DD'")
 
+def check_jwt(request):
+    auth_header = request.headers.get("Authorization", None)
+    if not auth_header:
+        raise GraphQLError("Authorization header is missing")
+    try:
+        token = auth_header.split(" ")[1]
+        jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+        signing_key = jwks_client.get_signing_key_from_jwt(token).key
+        decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
+        # print("Decoded token: ", decoded_id_token)
+
+    except jwt.ExpiredSignatureError:
+        raise GraphQLError("The token has expired.")
+    except jwt.InvalidAudienceError:
+        raise GraphQLError("Invalid audience claim.")
+    except jwt.InvalidIssuerError:
+        raise GraphQLError("Invalid issuer claim.")
+    except jwt.DecodeError:
+        raise GraphQLError("Error decoding the JWT.")
+    except jwt.PyJWTError as e:
+        raise GraphQLError(f"JWT Error: {e}")
+    except Exception as e:
+        raise GraphQLError(f"Authentication failed!")
 
 
 def create_app(test_config=None):
@@ -80,43 +104,43 @@ def create_app(test_config=None):
     )
 
     
-    def jwt_required(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # Get token from Authorization header
+    # def jwt_required(func):
+    #     @wraps(func)
+    #     def wrapper(*args, **kwargs):
+    #         # Get token from Authorization header
             
-            auth_header = request.headers.get("Authorization", None)
+    #         auth_header = request.headers.get("Authorization", None)
             
-            if not auth_header:
-                return jsonify({"message": "Authorization header is missing"}), 401
-            try:
-                token = auth_header.split(" ")[1]
-                jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
-                signing_key = jwks_client.get_signing_key_from_jwt(token).key
-                decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
+    #         if not auth_header:
+    #             return jsonify({"message": "Authorization header is missing"}), 401
+    #         try:
+    #             token = auth_header.split(" ")[1]
+    #             jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+    #             signing_key = jwks_client.get_signing_key_from_jwt(token).key
+    #             decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
                 
-            except jwt.ExpiredSignatureError:
-                print("The token has expired.")
-                return jsonify({"message": f"Authentication failed!"}), 401
-            except jwt.InvalidAudienceError:
-                print("Invalid audience claim.")
-                return jsonify({"message": f"Authentication failed!"}), 401
-            except jwt.InvalidIssuerError:
-                print("Invalid issuer claim.")
-                return jsonify({"message": f"Authentication failed!"}), 401
-            except jwt.DecodeError:
-                print("Error decoding the JWT.")
-                return jsonify({"message": f"Authentication failed!"}), 401
-            except jwt.PyJWTError as e:
-                print(f"JWT Error: {e}")
-                return jsonify({"message": f"Authentication failed!"}), 401
-            except Exception as e:
-                return jsonify({"message": f"Authentication failed!"}), 401
+    #         except jwt.ExpiredSignatureError:
+    #             print("The token has expired.")
+    #             return jsonify({"message": f"Authentication failed!"}), 401
+    #         except jwt.InvalidAudienceError:
+    #             print("Invalid audience claim.")
+    #             return jsonify({"message": f"Authentication failed!"}), 401
+    #         except jwt.InvalidIssuerError:
+    #             print("Invalid issuer claim.")
+    #             return jsonify({"message": f"Authentication failed!"}), 401
+    #         except jwt.DecodeError:
+    #             print("Error decoding the JWT.")
+    #             return jsonify({"message": f"Authentication failed!"}), 401
+    #         except jwt.PyJWTError as e:
+    #             print(f"JWT Error: {e}")
+    #             return jsonify({"message": f"Authentication failed!"}), 401
+    #         except Exception as e:
+    #             return jsonify({"message": f"Authentication failed!"}), 401
 
-        # If token is valid, continue to the actual endpoint
+    #     # If token is valid, continue to the actual endpoint
             
-            return func(*args, **kwargs)
-        return wrapper
+    #         return func(*args, **kwargs)
+    #     return wrapper
     
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
@@ -201,22 +225,21 @@ def create_app(test_config=None):
 
     # Resolver for `createuser` mutation
     @mutation.field("createUser")
+    # @jwt_required
     def resolve_create_user(_, info, firstName, name, email, dateOfBirth, location, gender):
-        # print(request.headers.get('Authorization'))
-        print("In resolver")
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+            
         userID = info.context.get('user_id')
         if (userID is None):
             userID = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
-        print("In resolver user id", userID)
-        print("Request headers", request.headers)
-        # print(f"Secret Key: {app.secret_key}")
-        # print(f"User ID stored in session: {session.get('user_id')}")
-        # print(session.get('user_id'))
-        if not check_email(email, rdf_graph):
-            raise Exception(f"user with email '{email}' already exists.")
-        
 
-        # new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
+        if not check_email(email, rdf_graph):
+            raise GraphQLError(str(f"user with email '{email}' already exists."))
+        
+        if not check_id(userID, rdf_graph):
+            raise GraphQLError(str(f"user with id '{userID}' already exists."))
+        
         new_user = {
             "id": userID,
             "firstName": firstName,
@@ -228,17 +251,26 @@ def create_app(test_config=None):
             "educations": [],
             "experiences": []
         }
+        print("New user")
+        print(f"State of rdf_graph before adding new user: {rdf_graph}")
         new_user = add_new_user(new_user, rdf_graph)
+        print(f"State of rdf_graph after adding new user: {rdf_graph}")
         return new_user
     
     @mutation.field("createCompany")
     def resolve_create_company(_, info,name, email, location):
+        current_request = info.context.get('request')
+        check_jwt(current_request)
 
-        if not check_email(email, rdf_graph):
-            raise Exception(f"company with email '{email}' already exists.")
-        
-        # new_id = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(10)) # TODO dongho --> oauth
         compID = info.context.get('user_id')
+        if not check_email(email, rdf_graph):
+            raise GraphQLError(str(f"user with email '{email}' already exists."))
+        
+        if not check_id(compID, rdf_graph):
+            raise GraphQLError(str(f"user with id '{compID}' already exists."))
+        
+        if (compID is None):
+            compID = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(25))
         print("CompId: ", compID)
         new_company = {
             "id": compID,
@@ -324,35 +356,38 @@ def create_app(test_config=None):
     def graphqlhandle():
         data = request.get_json()
         #Handle the request
-        auth_header = request.headers.get("Authorization")
-        # print(f"Authorization header: {auth_header}")
-        # print(data)
-        user_id = None
+        # auth_header = request.headers.get("Authorization")
+        # # print(f"Authorization header: {auth_header}")
+        # # print(data)
+        # user_id = None
 
-        if auth_header:
-            token = auth_header.split("Bearer ")[-1]  # Extract the JWT token from Bearer token
-            try:
-                # Decode the JWT token and extract the user_id (sub)
-                # decoded_token = jwt.decode(token)  # You can also pass a public key if you need to validate it
-                # user_id = decoded_token.get("sub")  # 'sub' is the user ID (usually the Auth0 user ID)
-                jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
-                signing_key = jwks_client.get_signing_key_from_jwt(token).key
-                decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
-                user_id = decoded_id_token.get("sub")
-                if user_id and user_id.startswith("auth0|"):
-                    user_id = user_id.split("|")[1]
+        # if auth_header:
+        #     token = auth_header.split("Bearer ")[-1]  # Extract the JWT token from Bearer token
+        #     try:
+        #         # Decode the JWT token and extract the user_id (sub)
+        #         # decoded_token = jwt.decode(token)  # You can also pass a public key if you need to validate it
+        #         # user_id = decoded_token.get("sub")  # 'sub' is the user ID (usually the Auth0 user ID)
+        #         jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+        #         signing_key = jwks_client.get_signing_key_from_jwt(token).key
+        #         decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
+        #         user_id = decoded_id_token.get("sub")
+        #         if user_id and user_id.startswith("auth0|"):
+        #             user_id = user_id.split("|")[1]
 
-            except Exception as e:
-                print("Invalid token:", e)
-                user_id = None  # If token is invalid, leave user_id as None
+        #     except Exception as e:
+        #         print("Invalid token:", e)
+        #         user_id = None  # If token is invalid, leave user_id as None
         
-        print(f"User ID: {user_id}")
+        # print(f"User ID: {user_id}")
+        user_ID = get_userId_by_request(request)
+        # context = {"user_id": 3}
         success, result = graphql_sync(
             schema,
             data,
-            context_value={"request": request, "user_id": user_id},
+            context_value={"request": request, "user_id": user_ID},
             debug=app.debug
         )
+        
 
         status_code = 200 if success else 400
         return jsonify(result), status_code
@@ -384,7 +419,7 @@ def create_app(test_config=None):
         id_token = token['id_token']
         user_id = token['userinfo']['sub']
         if user_id and user_id.startswith("auth0|"):
-                    user_id = user_id.split("|")[1]
+            user_id = user_id.split("|")[1]
 
         print("User ID: ", user_id)
         user_by_id = get_user_by_id(user_id, rdf_graph)
@@ -400,3 +435,25 @@ def create_app(test_config=None):
 
 
     return app
+
+def get_userId_by_request(current_request):
+    auth_header = current_request.headers.get("Authorization")
+    print(f"Authorization header: {auth_header}")
+    # print(data)
+    user_id = None
+
+    if auth_header:
+        token = auth_header.split("Bearer ")[-1]  # Extract the JWT token from Bearer token
+        try:
+            jwks_client = PyJWKClient("https://webinfoproject.eu.auth0.com/.well-known/jwks.json")
+            signing_key = jwks_client.get_signing_key_from_jwt(token).key
+            decoded_id_token = jwt.decode(token, signing_key, algorithms=["RS256"], audience="p44ZPot04hccnnkPGtx7ELWEZvym0yDi", issuer="https://webinfoproject.eu.auth0.com/")
+            user_id = decoded_id_token.get("sub")
+            if user_id and user_id.startswith("auth0|"):
+                user_id = user_id.split("|")[1]
+
+        except Exception as e:
+            print("Invalid token:", e)
+            user_id = None  # If token is invalid, leave user_id as None
+    
+    return user_id
