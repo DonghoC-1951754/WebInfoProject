@@ -1,0 +1,21 @@
+POST http://127.0.0.1:5000/graphql HTTP/1.1
+Content-Type: application/json
+
+{
+  "query": "mutation UpdateUser($id: ID!, $firstName: String, $name: String, $location: LocationInput, $gender: String, $lookingForWork: Boolean, $skills: [String]) { updateUser(id: $id, firstName: $firstName, name: $name, location: $location, gender: $gender, lookingForWork: $lookingForWork, skills: $skills) { id firstName name gender lookingForWork skills location { country city cityCode street houseNumber } } }",
+    "variables": {
+        "id": "U001",
+        "firstName": "Joh",
+        "name": "Don",
+        "gender": "Female",
+        "lookingForWork": false,
+        "skills": [],
+        "location": {
+            "country": "",
+            "city": "",
+            "cityCode": "",
+            "street": "",
+            "houseNumber": ""
+        }
+    }
+}

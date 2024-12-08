@@ -505,28 +505,6 @@ def get_active_vacancies(graph):
     return active_vacancies
 
 def update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, graph):
-    # check if user firstname exists
-    query = f"""
-    PREFIX ex: <http://example.com/schema#>
-
-    SELECT ?firstName
-    WHERE {{
-        ?user a ex:User ;
-                ex:id "{id}" ;
-                ex:firstName ?firstName .
-    }}
-    """
-
-    print(query)
-
-    query_results = graph.query(query)
-
-    if len(query_results) == 0:
-        print("User not found")
-    else:
-        for row in query_results:
-            print("User found", str(row["firstName"]))
-
 
     query = f"""
     PREFIX ex: <http://example.com/schema#>
@@ -542,6 +520,8 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
         delete += "?user ex:name ?name ."
     if gender:
         delete += "?user ex:gender ?gender ."
+    if lookingForWork is not None:
+        delete += "?user ex:lookingForWork ?lookingForWork ."
 
     delete += f"""}}
     WHERE {{
@@ -555,6 +535,9 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     if gender:
         delete += f"""
               ex:gender ?gender ;"""
+    if lookingForWork is not None:
+        delete += f"""
+              ex:lookingForWork ?lookingForWork ;"""
     delete += f"""
               ex:id "{id}" .
     }}
@@ -569,6 +552,8 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
         insert += f"?user ex:name \"{name}\" ."
     if gender:
         insert += f"?user ex:gender \"{gender}\" ."
+    if lookingForWork is not None:
+        insert += f"?user ex:lookingForWork \"{lookingForWork}\"^^xsd:boolean ."
 
     insert += "}"
     where = f"""
