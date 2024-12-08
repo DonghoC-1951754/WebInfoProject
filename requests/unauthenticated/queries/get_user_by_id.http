@@ -1,6 +1,6 @@
 POST http://127.0.0.1:5000/graphql HTTP/1.1
 Content-Type: application/json
 
-{"query":"query GetUserById($id: ID!) { user(id: $id) { id firstName name email dateOfBirth location { country city cityCode street houseNumber } gender educations { institution degree fieldOfStudy yearGraduated } experiences { company { name } jobTitle startDate endDate description } } }",
-    "variables":{"id":"6750740042a151293be37fba"}
+{"query":"query GetUserById($id: ID!) { user(id: $id) { id firstName name email dateOfBirth location { country city cityCode street houseNumber } gender lookingForWork skills connections { id fromUser { id name } toUser { id name } status } educations { institution degree fieldOfStudy yearGraduated } experiences { company { id name } jobTitle startDate endDate description } } }",
+    "variables":{"id":"U001"}
 }
