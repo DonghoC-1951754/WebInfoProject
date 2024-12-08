@@ -18,6 +18,11 @@ ex:User a owl:Class ;
     rdfs:label "User" ;
     rdfs:comment "A class representing users in the application." .
 
+# UserConnection
+ex:UserConnection a owl:Class ;
+    rdfs:label "UserConnection" ;
+    rdfs:comment "A class representing a connection between users." .
+
 # Company
 ex:Company a owl:Class ;
     rdfs:subClassOf foaf:Organization ;
@@ -94,6 +99,12 @@ ex:location a owl:ObjectProperty ;
     rdfs:label "location" ;
     rdfs:comment "The location of the user." .
 
+ex:lookingForWork a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:boolean ;
+    rdfs:label "lookingForWork" ;
+    rdfs:comment "If the user is looking for work or not." .
+
 ex:educations a owl:ObjectProperty ;
     rdfs:domain ex:User ;
     rdfs:range ex:Education ;
@@ -105,6 +116,37 @@ ex:experiences a owl:ObjectProperty ;
     rdfs:range ex:Experience ;
     rdfs:label "experiences" ;
     rdfs:comment "Professional experiences of the user." .
+
+ex:connections a owl:ObjectProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range ex:UserConnection ;
+    rdfs:label "connections" ;
+    rdfs:comment "The connections between users." .
+
+ex:skills a owl:ObjectProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:String ;
+    rdfs:label "skills" ;
+    rdfs:comment "Professional skills of the user." .
+
+# UserConnection properties
+ex:fromUser a owl:DatatypeProperty ;
+    rdfs:domain ex:UserConnection ;
+    rdfs:range ex:User ;
+    rdfs:label "fromUser" ;
+    rdfs:comment "The connection sender" .
+
+ex:toUser a owl:DatatypeProperty ;
+    rdfs:domain ex:UserConnection ;
+    rdfs:range ex:User ;
+    rdfs:label "fromUser" ;
+    rdfs:comment "The connection receiver" .
+
+ex:status a owl:DatatypeProperty ;
+    rdfs:domain ex:UserConnection ;
+    rdfs:range xsd:string ;
+    rdfs:label "status" ;
+    rdfs:comment "The status of the connection" .
 
 # Company properties
 ex:vacancies a owl:ObjectProperty ;
@@ -201,7 +243,6 @@ ex:description a owl:DatatypeProperty ;
     rdfs:comment "Description of the experience." .
 
 # Vacancy properties
-
 # ID
 ex:id a owl:DatatypeProperty ;
     rdfs:domain ex:Vacancy ;
