@@ -99,12 +99,6 @@ ex:location a owl:ObjectProperty ;
     rdfs:label "location" ;
     rdfs:comment "The location of the user." .
 
-ex:lookingForWork a owl:DatatypeProperty ;
-    rdfs:domain ex:User ;
-    rdfs:range xsd:boolean ;
-    rdfs:label "lookingForWork" ;
-    rdfs:comment "If the user is looking for work or not." .
-
 ex:educations a owl:ObjectProperty ;
     rdfs:domain ex:User ;
     rdfs:range ex:Education ;
