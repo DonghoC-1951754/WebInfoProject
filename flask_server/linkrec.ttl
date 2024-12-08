@@ -93,6 +93,12 @@ ex:lookingForWork a owl:DatatypeProperty ;
     rdfs:label "lookingForWork" ;
     rdfs:comment "Indication if user is actively looking for a job." .
 
+ex:skills a owl:DatatypeProperty ;
+    rdfs:domain ex:User ;
+    rdfs:range xsd:string ;
+    rdfs:label "skills" ;
+    rdfs:comment "Set of skills of a user." .
+
 ex:location a owl:ObjectProperty ;
     rdfs:domain ex:User ;
     rdfs:range ex:Location ;

@@ -29,6 +29,7 @@ ex:User1 a ex:User ;
     ex:dateOfBirth "1985-07-15"^^xsd:date ;
     ex:gender "Male" ;
     ex:lookingForWork "true"^^xsd:boolean ;
+    ex:skills "python", "Machine Learning";
     ex:location ex:Location1 ;
     ex:educations ex:Education1, ex:Education2 ;
     ex:experiences ex:Experience1 .
@@ -41,6 +42,7 @@ ex:User2 a ex:User ;
     ex:dateOfBirth "1990-02-20"^^xsd:date ;
     ex:gender "Female" ;
     ex:lookingForWork "false"^^xsd:boolean ;
+    ex:skills "fortnite";
     ex:location ex:Location2 ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .
@@ -53,6 +55,7 @@ ex:User3 a ex:User ;
     ex:dateOfBirth "1990-02-20"^^xsd:date ;
     ex:gender "Male" ;
     ex:lookingForWork "true"^^xsd:boolean ;
+    ex:skills "React", "JavaScript", "Node.js";
     ex:location ex:Location2 ;
     ex:educations ex:Education3 ;
     ex:experiences ex:Experience2, ex:Experience3 .

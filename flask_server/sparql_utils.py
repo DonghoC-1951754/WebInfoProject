@@ -132,7 +132,7 @@ def get_user_by_id(id, graph):
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender ?lookingForWork
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?houseNumber ?gender ?lookingForWork ?skills
     WHERE {{
       ?user a ex:User ;
             ex:id "{id}" ;
@@ -142,6 +142,7 @@ def get_user_by_id(id, graph):
             ex:dateOfBirth ?dateOfBirth ;
             ex:gender ?gender ;
             ex:lookingForWork ?lookingForWork ;
+            ex:skills ?skills ;
             ex:location ?location .
 
       ?location ex:country ?country ;
@@ -193,9 +194,12 @@ def get_user_by_id(id, graph):
     query_results_experience = graph.query(queryExperience)
     
     user = {}
+    qskills = []
 
     for row in query_results:
-        print("been here")
+        qskills.append(str(row["skills"]))
+
+    for row in query_results:
         user = {
             "id": id,
             "firstName": str(row["firstName"]),
@@ -216,6 +220,8 @@ def get_user_by_id(id, graph):
             "educations": [],
             "experiences": []
         }
+
+    user["skills"] = qskills
 
     print("user", user)
 
@@ -485,7 +491,7 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber ?lookingForWork
+    SELECT ?firstName ?name ?email ?dateOfBirth ?country ?city ?cityCode ?street ?gender ?houseNumber ?lookingForWork ?skills
     WHERE {{
       ?user a ex:User ;
             ex:id "{id}" ;
@@ -495,6 +501,7 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
             ex:dateOfBirth ?dateOfBirth ;
             ex:gender ?gender ;
             ex:lookingForWork ?lookingForWork ;
+            ex:skills ?skills ;
             ex:location ?location .
 
       ?location ex:country ?country ;
@@ -506,6 +513,13 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
     """
 
     query_results = graph.query(query)
+
+    # group 
+
+    qskills = []
+
+    for row in query_results:
+        qskills.append(str(row["skills"]))
 
     for row in query_results:
         user = {
@@ -525,6 +539,8 @@ def update_user(id, firstName, name, location, gender, lookingForWork, skills, e
                 "houseNumber": str(row["houseNumber"])
             }
         }
+
+    user["skills"] = qskills
 
     print(user)
     
