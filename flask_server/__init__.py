@@ -335,6 +335,14 @@ def create_app(test_config=None):
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
     def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, lookingForWork=None, skills=None, dateOfBirth=None, educations=None, experiences=None):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+        
+        userID = info.context.get('user_id')
+        if (userID != id):
+            raise GraphQLError(f"You are not allowed to update user with id '{id}'.")
+        
         user = update_user(id, firstName, name, location, gender, lookingForWork, skills, educations, experiences, rdf_graph)
         
         return user
