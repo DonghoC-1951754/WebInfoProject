@@ -208,6 +208,14 @@ def create_app(test_config=None):
 
     @mutation.field("addUserExperience")
     def resolve_add_user_experience(_, info, userId, companyId, jobTitle, startDate, endDate, description):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+        userID = info.context.get('user_id')
+        if (userID != userId):
+            raise GraphQLError(f"You are not allowed to add experience for user with id '{userId}'.")
+        ############################################
+
         global rdf_graph
         user = get_user_by_id(userId, rdf_graph)
         if user is None:

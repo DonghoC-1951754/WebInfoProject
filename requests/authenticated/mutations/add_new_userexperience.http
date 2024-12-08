@@ -3,8 +3,13 @@ Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjF3Y0FhM1lGNF
 Content-Type: application/json
 
 {
-  "query": "mutation RemoveConnection($connectionId: ID!) { removeConnection(connectionId: $connectionId) }",
-    "variables": {
-        "connectionId": "WPMINRTAOVYWKG8Q1JH0M0JGF"
-    }
+  "query": "mutation addUserExperience($userId: ID!, $companyId: ID!, $jobTitle: String!, $startDate: Date!, $endDate: Date, $description: String) { addUserExperience(userId: $userId, companyId: $companyId, jobTitle: $jobTitle, startDate: $startDate, endDate: $endDate, description: $description) { id company { id name } jobTitle startDate endDate description } }",
+  "variables": {
+    "userId": "6750740042a151293be37fba",
+    "companyId": "C001",
+    "jobTitle": "Software Engineer",
+    "startDate": "2019-01-01",
+    "endDate": "2020-01-01",
+    "description": "Developed new features for the application"
+  }
 }
