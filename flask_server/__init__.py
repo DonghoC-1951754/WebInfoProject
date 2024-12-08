@@ -146,31 +146,22 @@ def create_app(test_config=None):
     def resolve_user(_, info, id):
         return get_user_by_id(id, rdf_graph)
 
-    # @query.field("userByEmail")
-    # def resolve_user_by_email(_, info, email):
-    #     if check_email(email, rdf_graph):
-    #         return None
     
-    
-    # Resolver for `userByEmail` query
-    # @query.field("userByEmail")
-    # def resolve_user_by_email(_, info, email):
-    #     return next((user for user in users_test_data if user["email"] == email), None)
-
     @query.field("activeVacancies")
     def resolve_active_vacancies(_, info, currentDate):
         return get_active_vacancies(rdf_graph)
 
-    # @query.field("getUserConnections")
+    # @query.field("userConnections")
     # def resolve_user_connections(_, info, id):
     #     user = get_user_by_id(id, rdf_graph)
     #     return user["connections"]
     
-    # @query.field("getVacancyById")
+    # @query.field("vacancy")
     # def resolve_vacancy_by_id(_, info, id):
     #     return next((p for p in vacancies_test_data if p["id"] == id), None)
     
-    # @query.field("getUserMatchingVacancies")
+    # # query for getting the matching vacancies for a user
+    # @query.field("matchingVacancies")
     # def resolve_user_matching_vacancies(_, info, id):
     #     user = get_user_by_id(id, rdf_graph)
     #     user_skills = user["skills"]
@@ -188,8 +179,9 @@ def create_app(test_config=None):
     #                     break
     #     return matching_vacancies
     
+    # # gets the users that match the given vacancy
     #TODOsparql jeroen
-    # @query.field("GetVacancysMatchedUsers")
+    # @query.field("matchedUsers")
     # def resolve_vacancy_matched_users(_, info, id):
     #     vacancy = next((p for p in vacancies_test_data if p["id"] == id), None)
     #     vacancy_skills = vacancy["requiredSkills"]
@@ -205,7 +197,8 @@ def create_app(test_config=None):
     #                     break
     #     return matched_users
     
-    # @query.field("getCompanyVacancies")
+    # # gets the vacancies of the company with the given id
+    # @query.field("companyVacancies")
     # def resolve_company_vacancies(_, info, id):
     #     #return the vacancies of the company with the given id
     #     return next((p for p in companies_test_data if p["id"] == id), None)["vacancies"]
