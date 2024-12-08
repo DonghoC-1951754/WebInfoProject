@@ -206,6 +206,15 @@ def create_app(test_config=None):
 
     @mutation.field("sendConnectionRequest")
     def resolve_send_connection_request(_, info, fromUserId, toUserId):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+            
+        userID = info.context.get('user_id')
+        if (userID != fromUserId):
+            raise GraphQLError(f"User with id '{userID}' is not allowed to send connection request from user with id '{fromUserId}'.")
+        ############################################
+
         print("Send connection request")
         global rdf_graph
         userfrom = get_user_by_id(fromUserId, rdf_graph)
@@ -225,16 +234,42 @@ def create_app(test_config=None):
 
     @mutation.field("updateConnectionRequest")
     def resolve_update_connection_request(_, info, connectionId, status):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+
         print("Update connection request")
         global rdf_graph
+
+        userID = info.context.get('user_id')
+        user = get_user_by_id(userID, rdf_graph)
+        connections = user["connections"]
+        exists = any(entry['id'] == connectionId for entry in connections)
+        if not exists:
+            raise GraphQLError(f"Connection with id '{connectionId}' does not exist for user with id '{userID}'.")
+        ############################################
+
         connection = update_connection_request(connectionId, status, rdf_graph)
         print("connection: ", connection)
         return connection
 
     @mutation.field("removeConnection")
     def resolve_remove_connection(_, info, connectionId):
+        #### Authentication/authorization check ####
+        current_request = info.context.get('request')
+        check_jwt(current_request)
+
         print("Remove connection")
         global rdf_graph
+
+        userID = info.context.get('user_id')
+        user = get_user_by_id(userID, rdf_graph)
+        connections = user["connections"]
+        exists = any(entry['id'] == connectionId for entry in connections)
+        if not exists:
+            raise GraphQLError(f"Connection with id '{connectionId}' does not exist for user with id '{userID}'.")
+        ############################################
+
         delete_connection(connectionId, rdf_graph)
         return
 
@@ -345,9 +380,7 @@ def create_app(test_config=None):
             return jsonify({"error": "Invalid query"}), 400
 
         # Return the results as JSON
-        print("Rows: ", rows)
         json = jsonify(rows)
-        print("JSON: ", json)
         return json, 200
 
     @app.route("/graphql", methods=["POST"])
