@@ -357,14 +357,13 @@ def get_companiy_by_id(id, graph):
     vacancies_query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?id ?vacancy ?jobTitle ?requiredSkills ?startDate ?endDate
+    SELECT ?id ?vacancy ?jobTitle ?startDate ?endDate
     WHERE {{
         ?company a ex:Company ;
                 ex:id "{id}" ;
                 ex:vacancies ?vacancy .
         ?vacancy ex:id ?id ;
                  ex:jobTitle ?jobTitle ;
-                 ex:requiredSkills ?requiredSkills ;
                  ex:startDate ?startDate ;
                  ex:endDate ?endDate .
     }}
@@ -379,32 +378,27 @@ def get_companiy_by_id(id, graph):
             "id": str(row["id"]),
             "jobTitle": str(row["jobTitle"]),
             "startDate": row["startDate"].toPython(),
-            "requiredSkills": str(row["requiredSkills"]),
+            "requiredSkills": [],
             "endDate": row["endDate"].toPython()
         }
         vacancies.append(vacancy)
 
-    vacancy_skills = {}
-    current_id = None
-    for vacancy in vacancies:
-        if current_id == vacancy['id']:
-            vacancy_skills[current_id].append(vacancy['requiredSkills'])
-        else:
-            current_id = vacancy['id']
-            vacancy_skills[current_id] = [vacancy['requiredSkills']]
+        # get the skills of the vacancy
+        skills_query = f"""
+        PREFIX ex: <http://example.com/schema#>
+        
+        SELECT ?skills
+        WHERE {{
+            ?vacancy a ex:Vacancy ;
+                    ex:id "{row["id"]}" ;
+                    ex:requiredSkills ?skills .
+        }}
+        """
 
-    # remove duplicates
-    current_id = None
-    i = 0
-    while i < len(vacancies):
-        if current_id == vacancies[i]['id']:
-            vacancies.pop(i)
-        else:
-            current_id = vacancies[i]['id']
-            i += 1
+        skills_query_results = graph.query(skills_query)
 
-    for vacancy in vacancies:
-        vacancy['requiredSkills'] = vacancy_skills[vacancy['id']]
+        for skill in skills_query_results:
+            vacancy["requiredSkills"].append(str(skill["skills"]))
 
     company["vacancies"] = vacancies
 
@@ -955,7 +949,6 @@ def add_new_vacancy(jobTitle, companyId, requiredSkills, startDate, endDate, gra
             ex:id "{vacancyId}" ;
             ex:jobTitle "{jobTitle}" ;
             ex:company ?company ;
-            ex:requiredSkills "{requiredSkills}" ;
             ex:startDate "{startDate}"^^xsd:date ;
             ex:endDate "{endDate}"^^xsd:date .
     }} WHERE {{
@@ -969,18 +962,46 @@ def add_new_vacancy(jobTitle, companyId, requiredSkills, startDate, endDate, gra
     query = f"""
     PREFIX ex: <http://example.com/schema#>
 
-    SELECT ?jobTitle ?companyName ?requiredSkills ?startDate ?endDate
-    WHERE {{
+    INSERT {{
+        ?company ex:vacancies ?vacancy .
+    }} WHERE {{
         ?company a ex:Company ;
-                ex:id "{companyId}" ;
-                ex:name ?companyName .
+                ex:id "{companyId}" .
+        ?vacancy a ex:Vacancy ;
+                ex:id "{vacancyId}" .
+    }}
+    """
+
+    graph.update(query)
+
+    for skill in requiredSkills:
+        skillsquery = f"""
+        PREFIX ex: <http://example.com/schema#>
+
+        INSERT {{
+            ?vacancy ex:requiredSkills "{skill}" .
+        }} WHERE {{
+            ?vacancy a ex:Vacancy ;
+                    ex:id "{vacancyId}" .
+        }}
+        """
+        graph.update(skillsquery)
+        print(skillsquery)
+
+    query = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?jobTitle ?companyName ?startDate ?endDate
+    WHERE {{
         ?vacancy a ex:Vacancy ;
                  ex:id "{vacancyId}" ;
                  ex:jobTitle ?jobTitle ;
                  ex:company ?company ;
-                 ex:requiredSkills ?requiredSkills ;
                  ex:startDate ?startDate ;
                  ex:endDate ?endDate .
+        ?company a ex:Company ;
+                ex:id "{companyId}" ;
+                ex:name ?companyName .
     }}
     """
 
@@ -996,10 +1017,26 @@ def add_new_vacancy(jobTitle, companyId, requiredSkills, startDate, endDate, gra
                 "id": companyId,
                 "name": str(row["companyName"])
             },
-            "requiredSkills": str(row["requiredSkills"]),
+            "requiredSkills": [],
             "startDate": row["startDate"].toPython(),
             "endDate": row["endDate"].toPython()
         }
+
+    query_skills = f"""
+    PREFIX ex: <http://example.com/schema#>
+
+    SELECT ?skills
+    WHERE {{
+        ?vacancy a ex:Vacancy ;
+                    ex:id "{vacancyId}" ;
+                    ex:requiredSkills ?skills .
+    }}
+    """
+
+    query_results_skills = graph.query(query_skills)
+
+    for row in query_results_skills:
+        vacancy["requiredSkills"].append(str(row["skills"]))
 
     return vacancy
 
