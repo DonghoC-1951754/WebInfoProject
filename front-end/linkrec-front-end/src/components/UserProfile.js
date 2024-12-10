@@ -27,7 +27,13 @@ const UserProfile = () => {
         houseNumber: undefined,
         lookingForWork: undefined,
     });
-    const [updateUser] = useMutation(UPDATE_USER); // Use the hook here
+    const [updateUser] = useMutation(UPDATE_USER , {
+        context: {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+          },
+        },
+      }); // Use the hook here
 
     const toggleEdit = (field, currentValue) => {
         setEditableFields((prev) => ({

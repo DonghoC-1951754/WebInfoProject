@@ -7,7 +7,7 @@ Content-Type: application/json
   "audience": "https://auth0-graphql-api",
   "grant_type": "password",
   "scope": "openid profile email",
-  "username": "kimpsseppe@gmail.com",
-  "password": "Jos1234.",
+  "username": "testcompany@gmail.com",
+  "password": "TestTest1",
   "connection": "Username-Password-Authentication"
 }
