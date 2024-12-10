@@ -232,7 +232,8 @@ def get_user_by_id(id, graph):
             "experiences": []
         }
 
-    user["skills"] = qskills
+    if len(qskills) > 0:
+        user["skills"] = qskills
 
     for row in query_results_education:
         education = {
