@@ -412,12 +412,12 @@ def get_all_vacancies(graph):
     PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
     PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
-    SELECT ?vacancy ?jobTitle ?companyId ?companyName ?country ?city ?cityCode ?street ?houseNumber ?requiredskills ?startDate ?endDate
+    SELECT ?vacancy ?vacancyId ?jobTitle ?companyId ?companyName ?country ?city ?cityCode ?street ?houseNumber ?startDate ?endDate
     WHERE {
         ?vacancy a ex:Vacancy ;
+                    ex:id ?vacancyId ;
                  ex:jobTitle ?jobTitle ;
                  ex:company ?company ;
-                 ex:requiredSkills ?requiredskills ;
                  ex:startDate ?startDate ;
                  ex:endDate ?endDate .
 
@@ -438,7 +438,7 @@ def get_all_vacancies(graph):
     vacancies = []
     for row in query_results:
         vacancy = {
-            "id": str(row["vacancy"]),
+            "id": str(row["vacancyId"]),
             "jobTitle": str(row["jobTitle"]),
             "company": {
                 "id": str(row["companyId"]),
@@ -451,35 +451,28 @@ def get_all_vacancies(graph):
                     "houseNumber": str(row["houseNumber"])
                 }
             },
-            "requiredSkills": row['requiredskills'],
+            "requiredSkills": [],
             "startDate": row["startDate"].toPython(),
             "endDate": row["endDate"].toPython()
         }
         vacancies.append(vacancy)
 
-    # group skills by vacancy
-    current_id = None
-    skills = {}
+    # get the skills of the vacancy
     for vacancy in vacancies:
-        if current_id == vacancy['id']:
-            skills[current_id].append(vacancy['requiredSkills'])
-        else:
-            current_id = vacancy['id']
-            skills[current_id] = [vacancy['requiredSkills']]
+        skills_query = f"""
+        PREFIX ex: <http://example.com/schema#>
+        SELECT ?skills
+        WHERE {{
+            ?vacancy a ex:Vacancy ;
+                    ex:id "{vacancy["id"]}" ;
+                    ex:requiredSkills ?skills .
+        }}
+        """
 
-    # remove duplicates
-    current_id = None
-    i = 0
-    while i < len(vacancies):
-        if current_id == vacancies[i]['id']:
-            vacancies.pop(i)
-        else:
-            current_id = vacancies[i]['id']
-            i += 1
+        skills_query_results = graph.query(skills_query)
 
-    # add skills to vacancies
-    for vacancy in vacancies:
-        vacancy['requiredSkills'] = skills[vacancy['id']]
+        for skill in skills_query_results:
+            vacancy["requiredSkills"].append(str(skill["skills"]))
 
     return vacancies
 
@@ -986,7 +979,6 @@ def add_new_vacancy(jobTitle, companyId, requiredSkills, startDate, endDate, gra
         }}
         """
         graph.update(skillsquery)
-        print(skillsquery)
 
     query = f"""
     PREFIX ex: <http://example.com/schema#>
@@ -1068,12 +1060,13 @@ def get_all_users(graph):
     users = []
 
     for row in query_results:
+
         skills_query = f"""
-        PREFIX ex: <http://example.com/schema>
+        PREFIX ex: <http://example.com/schema#>
         SELECT ?skills
         WHERE {{
             ?user a ex:User ;
-                    ex:id "{row["id"]}" ;
+                    ex:id "{str(row["id"])}" ;
                     ex:skills ?skills .
         }}
         """

@@ -183,20 +183,31 @@ def create_app(test_config=None):
     def resolve_vacancy_matched_users(_, info, vacancyId):
         vacancies = get_all_vacancies(rdf_graph)
         vacancy = next((p for p in vacancies if p["id"] == vacancyId), None)
-        vacancy_skills = vacancy["requiredSkills"]
-        vacancy_cityCode = vacancy["company"]["location"]["cityCode"]
-        matched_users = []
-        users = get_all_users(rdf_graph)
-        for user in users:
-            if user["lookingForWork"]:
-                if user["location"]["cityCode"] == vacancy_cityCode:
-                    matched_users.append(user)
-                else:
+        if vacancy:
+            vacancy_skills = vacancy["requiredSkills"]
+            vacancy_cityCode = vacancy["company"]["location"]["cityCode"]
+            matched_users = []
+            users = get_all_users(rdf_graph)
+            for user in users:
+                if user["lookingForWork"]:
+                    user_city_code_str = user["location"].get("cityCode")
+
+                    # Check if both city codes can be validly converted to integers
+                    if user_city_code_str.isdigit():
+                        user_city_code = int(user_city_code_str)
+
+                        # Compare the integer values
+                        if user_city_code == vacancy_cityCode:
+                            matched_users.append(user)
+                            continue
+                    else:
+                        print("City code is not a valid integer")
+                        
                     for skill in vacancy_skills:
                         if skill in user["skills"]:
                             matched_users.append(user)
                             break
-        return matched_users
+            return matched_users
     
 
     @mutation.field("addUserExperience")
