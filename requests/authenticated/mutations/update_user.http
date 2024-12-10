@@ -1,22 +1,22 @@
 POST http://127.0.0.1:5000/graphql HTTP/1.1
-Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjF3Y0FhM1lGNFVHVGVuWWd5OUhuRCJ9.eyJuaWNrbmFtZSI6ImRvbmdoby5hbHRlcm5hdGl2ZSIsIm5hbWUiOiJkb25naG8uYWx0ZXJuYXRpdmVAZ21haWwuY29tIiwicGljdHVyZSI6Imh0dHBzOi8vcy5ncmF2YXRhci5jb20vYXZhdGFyLzk5ZDViNjE5NzljNTEyNWFkNDNkYzgwMTRmZWQwY2Y1P3M9NDgwJnI9cGcmZD1odHRwcyUzQSUyRiUyRmNkbi5hdXRoMC5jb20lMkZhdmF0YXJzJTJGZG8ucG5nIiwidXBkYXRlZF9hdCI6IjIwMjQtMTItMDhUMTc6NDc6MjYuNzkzWiIsImVtYWlsIjoiZG9uZ2hvLmFsdGVybmF0aXZlQGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly93ZWJpbmZvcHJvamVjdC5ldS5hdXRoMC5jb20vIiwiYXVkIjoicDQ0WlBvdDA0aGNjbm5rUEd0eDdFTFdFWnZ5bTB5RGkiLCJpYXQiOjE3MzM2ODAwNDYsImV4cCI6MTczMzcxNjA0Niwic3ViIjoiYXV0aDB8Njc1MDc0MDA0MmExNTEyOTNiZTM3ZmJhIn0.spwGyjBaxn2_tep7HAKhDXyJMFNg2bPqktVPU-PDPgXjEoza9ZwbkCBtxEBMF_nkZPHBs_WjOsj3uyDL_M2U9QDO4gM5atsn_bFoIsh38qM61F0ps-U84Enms6pIzIypKtwxjUvtiu3e8oxWJ1rq2-rcGCx-hKoPJ866G0RhGAQu9cKxPU-E3ubUt2fTkSavWDAzMA3N9sH224qKs83G1kTJ52P0Z0kVV2hAbuTMvHSueB2qIHdaN44ztRw-p7wHrrlV8G6TmV3he0c03HzviACUL6jd_dK8mtv6Ai76dxuiXh3VQbdUZXMnbUBWtLcWh4eG9zQBwkuEdHVvGkXdbg
+Authorization: Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6IjF3Y0FhM1lGNFVHVGVuWWd5OUhuRCJ9.eyJuaWNrbmFtZSI6InRlc3Rjb21wYW55IiwibmFtZSI6InRlc3Rjb21wYW55QGdtYWlsLmNvbSIsInBpY3R1cmUiOiJodHRwczovL3MuZ3JhdmF0YXIuY29tL2F2YXRhci9mYzYxNDZmYmE1NWMwNDUwNDhmNGI5YmM3NmNjYzk5OT9zPTQ4MCZyPXBnJmQ9aHR0cHMlM0ElMkYlMkZjZG4uYXV0aDAuY29tJTJGYXZhdGFycyUyRnRlLnBuZyIsInVwZGF0ZWRfYXQiOiIyMDI0LTEyLTEwVDE0OjMzOjMxLjcyMFoiLCJlbWFpbCI6InRlc3Rjb21wYW55QGdtYWlsLmNvbSIsImVtYWlsX3ZlcmlmaWVkIjpmYWxzZSwiaXNzIjoiaHR0cHM6Ly93ZWJpbmZvcHJvamVjdC5ldS5hdXRoMC5jb20vIiwiYXVkIjoicDQ0WlBvdDA0aGNjbm5rUEd0eDdFTFdFWnZ5bTB5RGkiLCJpYXQiOjE3MzM4NDEyMTEsImV4cCI6MTczMzg3NzIxMSwic3ViIjoiYXV0aDB8Njc1ODUxMjQxODQwNWZjNGZmOTk2MTZjIn0.337nBMiQOrlqwMoP63bKw7lDcWta6kbJ7jWmzi4s51s_X7Be0KEIsoABMjv_hBktXI56UPDXxVvQyAEweQE4iXZfLzg7P8mEgdauT4Q6picqBC1AmzRF1jNT7hFZvjntsaU7LAdM7w36y3zLaS3PQPA-MnchKbo_Jv5pNNOwPF31b-SNngUQjAIU5U1vkY_ixQMNMq5JBA2QySQvcL3sQMiMw8xzxJM-ST9OaGapFkPQlokJJnzgp5gLTq3EQGPNslKu5WFpZKqj4Q_lB3muDBukcNolTx4vwkVQZnsaqDpRs8t1dc19vZmmvxPx9L-l53-eyVcySHpBJcJB2z4iJg
 Content-Type: application/json
 
 {
   "query": "mutation UpdateUser($id: ID!, $firstName: String, $name: String, $location: LocationInput, $gender: String, $lookingForWork: Boolean, $skills: [String]) { updateUser(id: $id, firstName: $firstName, name: $name, location: $location, gender: $gender, lookingForWork: $lookingForWork, skills: $skills) { id firstName name gender lookingForWork skills location { country city cityCode street houseNumber } } }",
     "variables": {
-        "id": "U002",
-        "firstName": "Joh",
-        "name": "Don",
+        "id": "67584d8f12d83d4659f1daab",
+        "firstName": "UpdatedUser",
+        "name": "test",
         "gender": "Female",
         "lookingForWork": false,
         "skills": [],
         "location": {
-            "country": "Lebron James",
-            "city": "yucatan",
-            "cityCode": "Tilted towers",
-            "street": "",
-            "houseNumber": "Turkije"
+            "country": "Belgium",
+            "city": "Hasselt",
+            "cityCode": "3500",
+            "street": "teststraat",
+            "houseNumber": "1"
         }
     }
 }

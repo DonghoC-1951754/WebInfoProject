@@ -4,6 +4,6 @@ Content-Type: application/json
 {
   "query": "query GetUserConnections($userId: ID!) { userConnections(userId: $userId) { id fromUser { id name } toUser { id name } status } }",
     "variables": {
-        "userId": "U002"
+        "userId": "67584d8f12d83d4659f1daab"
     }
 }

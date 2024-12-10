@@ -275,6 +275,8 @@ def create_app(test_config=None):
             raise GraphQLError(f"Connection with id '{connectionId}' does not exist for user with id '{userID}'.")
         ############################################
 
+        
+
         connection = update_connection_request(connectionId, status, rdf_graph)
         return connection
 
@@ -372,6 +374,7 @@ def create_app(test_config=None):
     # Resolver for `updateUser` mutation
     @mutation.field("updateUser")
     def resolve_update_user(_, info, id, firstName=None, name=None, email=None, location=None, gender=None, lookingForWork=None, skills=None, dateOfBirth=None, educations=None, experiences=None):
+        print("UPDATED USER")
         #### Authentication/authorization check ####
         current_request = info.context.get('request')
         check_jwt(current_request)
